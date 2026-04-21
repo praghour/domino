@@ -2,5 +2,5 @@
 </script>
 
 <template>
-  
+  <!-- главная страница -->
 </template>
