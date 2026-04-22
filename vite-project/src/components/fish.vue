@@ -1,0 +1,3 @@
+<template>
+    goida
+</template>
