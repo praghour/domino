@@ -1,9 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import main from "./components/main.vue";
+import task from "./components/task.vue";
+import taskForm from "./components/taskForm.vue";
 
 const routes = [
-    {path: '/', component: main, name: 'main'}
+    {path: '/', component: main, name: 'main'},
+    {path: '/task/:id([0-9]+)', component: task, name: 'task', children: [
+        {path: 'form', component: taskForm, name: 'taskForm'}
+    ]}
 ];
 
 export const router = createRouter({
