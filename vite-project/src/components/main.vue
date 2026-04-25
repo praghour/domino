@@ -1,12 +1,9 @@
 <script setup>
+import useNotice from './composables/useNotice';
+
+const { noticeText, isNoticeVisible } = useNotice();
 </script>
 
 <template>
 
-  <!-- главная страница -->
-   <p>всем привки!!!</p>
-=======
-         дарова
-
-         <p>🐀</p>
 </template>
