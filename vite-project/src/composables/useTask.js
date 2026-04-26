@@ -83,6 +83,7 @@ function editTask(taskId, editName, editDescription) {
 // экспорт всего и вся
 export default function useTask() {
     return {
-        tasks, addTask, findTask, deleteTask, editTask, saveTasksToStorage, loadTasksFromStorage
+        tasks, 
+        addTask, findTask, deleteTask, editTask, saveTasksToStorage, loadTasksFromStorage
     };
 };
