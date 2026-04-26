@@ -1,4 +1,5 @@
 <script setup>
+import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
 const { noticeText, isNoticeVisible } = useNotice();
