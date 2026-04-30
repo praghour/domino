@@ -2,9 +2,9 @@ import { computed, reactive } from 'vue';
 
 // default список задач для проверок и тестов
 const defaultTaskList = [
-    {id: 0, name: 'Задача 1', description: 'Сделать раз'},
-    {id: 1, name: 'Задача 2', description: 'Сделать два'},
-    {id: 2, name: 'Задача 3', description: 'Сделать три'}
+    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий'},
+    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Низкий'},
+    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Низкий'}
 ];
 
 const taskList = reactive([]);
@@ -35,7 +35,7 @@ loadTasksFromStorage();
 const tasks = computed(() => taskList);
 
 // добавление задачи
-function addTask(newName, newDescription) {
+function addTask(newName, newDescription, newPriority) {
     let maxId = -1;
     for (let i = 0; i < taskList.length; i++) {
         if (taskList[i].id > maxId) {
@@ -48,6 +48,10 @@ function addTask(newName, newDescription) {
         id: newTaskId,
         name: newName,
         description: newDescription,
+        priority: newPriority,
+        isDone: false,
+        isArchive: false,
+        isExpired: false
     });
 
     saveTasksToStorage();
@@ -68,14 +72,15 @@ function deleteTask(taskId) {
 };
 
 // изменение задачи
-function editTask(taskId, editName, editDescription) {
+function editTask(taskId, editName, editDescription, editPriority) {
     const editingTask = taskList.find((task) => task.id === taskId);
     if (!editingTask) {
-        return;
+        return
     };
 
     editingTask.name = editName;
     editingTask.description = editDescription;
+    editingTask.priority = editPriority;
 
     saveTasksToStorage();
 };
