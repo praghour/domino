@@ -62,7 +62,6 @@ function changeFilter(filter) {
 function completeTask(task) {
     task.isDone = !task.isDone;
     saveTasksToStorage();
-
     if (task.isDone) {
         showNotice('Задача выполнена');
     } else {
