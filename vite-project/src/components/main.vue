@@ -85,5 +85,5 @@ function remove(id) {
 </script>
 
 <template>
-
+    
 </template>
