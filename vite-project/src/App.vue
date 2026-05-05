@@ -1,8 +1,6 @@
 <script setup>
 import task from './components/task.vue';
 import useNotice from './composables/useNotice';
-import { useRouter } from 'vue-router';
-const router = useRouter()
 const { noticeText, isNoticeVisible } = useNotice();
 </script>
 
@@ -13,7 +11,7 @@ const { noticeText, isNoticeVisible } = useNotice();
         {{ noticeText }}
         </div>
     </div>
-    <button @click="router.push({name: 'arena'})">Кал</button>
+    <RouterView></RouterView>
 </template>
 
 <style scoped>

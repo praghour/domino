@@ -77,7 +77,8 @@ function archiveTask(task) {
     showNotice('Задача добавлена в архив');
 };
 
-// удаление задачи
+// удаление задачи#
+
 function remove(id) {
     deleteTask(id);
     showNotice('Задача удалена');
@@ -85,5 +86,5 @@ function remove(id) {
 </script>
 
 <template>
-    
+
 </template>

@@ -1,8 +1,26 @@
-<script>
-import { ref, reactive, computed} from 'vue';
-import { useRouter } from 'vue-router';
+<script setup>
+import useFishman from '../composables/Arena';
+
+const { fishList } = useFishman();
 </script>
+
 <template>
-    <div>hahah</div>
-    <img src="https://tse2.mm.bing.net/th/id/OIP.nSBo7p7um0v9Qt4-udyg0AHaFK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="">
+    <div class="fish" v-for="value in fishList" :key="value.id">
+        <img :src="value.img" width="50px" :alt="value.name">
+    </div>
+    <div class="fish">{{ value.health }}</div>
+    <div class="uebok">
+        <img src="/public/710090f0fc77d351e3765c2954efa3bcb1886276.png" width="100px" alt="">
+        <p class="health">health</p>
+    </div>
 </template>
+<style>
+.Fish{
+    position: absolute;
+    left: 200px;
+}
+.uebok{
+    position: absolute;
+    left: 600px;
+}
+</style>
