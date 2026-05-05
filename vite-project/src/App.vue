@@ -7,6 +7,7 @@ const { noticeText, isNoticeVisible } = useNotice();
 
 <template>
     <div class="app">
+        <RouterView/>
 
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
