@@ -3,13 +3,15 @@ import DEATHARENA from "./components/DEATHARENA.vue";
 import main from "./components/main.vue";
 import task from "./components/task.vue";
 import taskForm from "./components/taskForm.vue";
+import Aquarium from "./components/Aquarium.vue"
 
 const routes = [
     {path: '/', component: main, name: 'main'},
     {path: '/task/:id([0-9]+)', component: task, name: 'task', children: [
         {path: 'form', component: taskForm, name: 'taskForm'}
     ]},
-    {path: '/DEATHARENA', component: DEATHARENA, name: 'arena'}
+    {path: '/DEATHARENA', component: DEATHARENA, name: 'arena'},
+    { path: '/Aquarium', component: Aquarium, name: 'aquarium' }
 ];
 
 export const router = createRouter({
