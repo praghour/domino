@@ -2,6 +2,7 @@ import { computed, ref } from 'vue';
 
 const minutes = ref(25);
 const activeMinutes = ref(25);
+const activeTimerButton = ref('');
 const secondsLeft = ref(minutes.value * 60);
 
 const isStarted = ref(false);
@@ -18,6 +19,7 @@ const timeText = computed(() => {
     if (currentMinutes < 10) {
         minuteText = '0' + currentMinutes;
     };
+
     if (currentSeconds < 10) {
         secondText = '0' + currentSeconds;
     };
@@ -36,10 +38,15 @@ const progressPercent = computed(() => {
     return Math.round(secondsLeft.value / fullTime * 100);
 });
 
+// отслеживание прошедшего времени
+const passedPercent = computed(() => {
+    return 100 - progressPercent.value;
+});
+
 // отслеживание изменения внешнего вида кружка таймера
 const timerStyle = computed(() => {
     return {
-        background: `conic-gradient(from -90deg, #3478f6 0% ${progressPercent.value}%, #edf1f7 ${progressPercent.value}% 100%)`
+        background: `conic-gradient(#edf1f7 0% ${passedPercent.value}%, #3478f6 ${passedPercent.value}% 100%)`
     };
 });
 
@@ -49,6 +56,7 @@ function startTimer() {
         return;
     };
 
+    activeTimerButton.value = 'start';
     isStarted.value = true;
 
     timerInterval.value = setInterval(() => {
@@ -62,6 +70,7 @@ function startTimer() {
 
 // приостановка отсчёта
 function pauseTimer() {
+    activeTimerButton.value = 'pause';
     isStarted.value = false;
     clearInterval(timerInterval.value);
 };
@@ -69,6 +78,7 @@ function pauseTimer() {
 // обновление времени таймера
 function resetTimer() {
     pauseTimer();
+    activeTimerButton.value = 'reset';
     secondsLeft.value = minutes.value * 60;
 };
 
@@ -83,6 +93,7 @@ function setMinutes(newMinutes) {
 function minusMinute() {
     if (minutes.value > 1) {
         minutes.value = minutes.value - 1;
+        activeMinutes.value = minutes.value;
         resetTimer();
     };
 };
@@ -90,13 +101,14 @@ function minusMinute() {
 // прибавление минут
 function plusMinute() {
     minutes.value = minutes.value + 1;
+    activeMinutes.value = minutes.value;
     resetTimer();
 };
 
 // эскпорт всего и вся
 export default function useTimer() {
     return {
-        minutes, activeMinutes, secondsLeft, isStarted, timeText, timerStyle,
+        minutes, activeMinutes, activeTimerButton, secondsLeft, isStarted, timeText, timerStyle,
         startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute
     };
 };

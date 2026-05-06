@@ -1,43 +1,36 @@
 <script setup>
 import useTimer from '../composables/useTimer';
 
-const { minutes, timeText, timerStyle, activeMinutes,
+const { minutes, activeMinutes, activeTimerButton, timeText, timerStyle,
 startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useTimer();
 </script>
 
 <template>
     <div class="timer_page">
         <div class="timer_check">
-            <div>
+            <div class="timer_header">
                 <h2>Фокусировка</h2>
                 <p>Сосредоточьтесь на работе без отвлечений</p>
             </div>
-
             <div class="timer" :style="timerStyle">
-                <div class="timer_inner">
-                    {{ timeText }}
-                </div>
+                <div class="timer_inner">{{ timeText }}</div>
             </div>
-
             <div class="timer_buttons">
-                <button class="blue_button" @click="startTimer">Старт</button>
-                <button @click="pauseTimer">Пауза</button>
-                <button @click="resetTimer">Сбросить</button>
+                <button :class="{ blue_button: activeTimerButton === 'start' }" @click="startTimer">Старт</button>
+                <button :class="{ blue_button: activeTimerButton === 'pause' }" @click="pauseTimer">Пауза</button>
+                <button :class="{ blue_button: activeTimerButton === 'reset' }" @click="resetTimer">Сбросить</button>
             </div>
-
             <p class="timer_note">Сфокусируйтесь на важном. Остальное подождёт</p>
         </div>
 
         <div class="timer_set">
             <p class="set_title">Настроить время</p>
-
             <div class="time_control">
                 <button @click="minusMinute">−</button>
                 <b>{{ minutes }}:00</b>
                 <span>мин</span>
                 <button @click="plusMinute">+</button>
             </div>
-
             <div class="time_buttons">
                 <button :class="{ active_button: activeMinutes === 15 }" @click="setMinutes(15)">15 мин</button>
                 <button :class="{ active_button: activeMinutes === 25 }" @click="setMinutes(25)">25 мин</button>
@@ -67,8 +60,18 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 .timer_check {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 35px;
+}
+
+.timer_header {
+  width: 100%;
+  text-align: left;
+}
+
+.timer_header h2,
+.timer_header p {
+  text-align: left;
 }
 
 .timer_check h2 {
@@ -90,6 +93,7 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
 }
 
 .timer_inner {
@@ -111,6 +115,11 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.timer_buttons,
+.timer_note {
+  align-self: center;
 }
 
 button {
@@ -136,6 +145,7 @@ button {
 
 .timer_set {
   height: fit-content;
+  text-align: left;
 }
 
 .set_title {
