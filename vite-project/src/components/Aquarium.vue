@@ -1,68 +1,35 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import useAquarium from "../composables/useAquarium.js";
 
-const activeMode = ref("aquarium"); // aquarium или arena
+const aquarium = useAquarium();
+
+const activeMode = ref("aquarium");
 
 const setActiveMode = (mode) => {
   activeMode.value = mode;
 };
-// СЛАЙДЕР-ФОН
-const slidesfon = ref([
-  { id: 1, src: "/Aquarium/fon1.png", alt: "фон 1" },
-  { id: 2, src: "/Aquarium/fon2.png", alt: "фон 2" },
-  { id: 3, src: "/Aquarium/fon3.png", alt: "фон 3" },
-  { id: 4, src: "/Aquarium/fon4.png", alt: "фон 4" },
-  { id: 5, src: "/Aquarium/fon5.png", alt: "фон 5" },
-  { id: 6, src: "/Aquarium/fon6.png", alt: "фон 6" }
-]);
 
-const currentIndexFon = ref(0); 
+const visibleFonSlides = computed(() => {
+  return aquarium.slidesfon.value.slice(aquarium.currentIndexFon.value, aquarium.currentIndexFon.value + 3);
+});
 
-// переключения вправо 
-const nextSlideFon = () => {
-  if (currentIndexFon.value + 3 < slidesfon.value.length) {
-    currentIndexFon.value++;
-  }
-};
+const visibleFishSlides = computed(() => {
+  return aquarium.slidesfish.value.slice(aquarium.currentIndexFish.value, aquarium.currentIndexFish.value + 3);
+});
 
-// переключения влево 
-const prevSlideFon = () => {
-  if (currentIndexFon.value > 0) {
-    currentIndexFon.value--;
-  }
-};
+const currentFon = computed(() => {
+  return aquarium.slidesfon.value.find(f => f.id === aquarium.selectedFonId.value);
+});
 
-// СЛАЙДЕР-РЫБЫ
-const slidesfish = ref([
-  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1" },
-  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2" },
-  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3" },
-  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4" },
-  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5" },
-  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6" },
-  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7" },
-  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8" },
-  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9" }
-]);
+onMounted(() => {
+  aquarium.startAnimation();
+});
 
-const currentIndexFish = ref(0); 
-
-// переключения вправо 
-const nextSlideFish = () => {
-  if (currentIndexFish.value + 3 < slidesfish.value.length) {
-    currentIndexFish.value++;
-  }
-};
-
-// переключения влево 
-const prevSlideFish = () => {
-  if (currentIndexFish.value > 0) {
-    currentIndexFish.value--;
-  }
-};
-
-
+onUnmounted(() => {
+  aquarium.stopAnimation();
+});
 </script>
 
 <template>
@@ -73,9 +40,8 @@ const prevSlideFish = () => {
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
                 <div class="balance-values">
-                    <!-- СЮДА ВЪЕБАТЬ ПЕРЕМЕННЫЕ С КЭШЕМ -->
-                    <p class="balance-item">10{{  }}<img src="/Aquarium/money.png" alt=""></p>
-                    <p class="balance-item">10{{  }}<img src="/Aquarium/crystals.png" alt=""></p>
+                    <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+                    <p class="balance-item">10<img src="/Aquarium/crystals.png" alt=""></p>
                 </div>
             </div>
             <button class="chest-btn">Сундуки</button>
@@ -87,18 +53,21 @@ const prevSlideFish = () => {
             <p class="gs-p2">Фон</p>
 
             <div class="slider">   
-                <button class="control-btn" @click="prevSlideFon">
+                <button class="control-btn" @click="aquarium.prevSlideFon()">
                     <img src="/Aquarium/left.png" alt="">
                 </button>
                 <div class="slides">
                     <div class="slide">
                         <button 
-                            v-for="(slide) in slidesfon.slice(currentIndexFon, currentIndexFon + 3)" :key="slide.id" class="bgfon-btn">
+                            v-for="(slide) in visibleFonSlides" :key="slide.id" 
+                            class="bgfon-btn"
+                            :class="{ 'active-fon': aquarium.selectedFonId.value === slide.id }"
+                            @click="aquarium.selectFon(slide)">
                             <img :src="slide.src" :alt="slide.alt" />
                         </button>
                     </div>
                 </div>
-                <button class="control-btn" @click="nextSlideFon">
+                <button class="control-btn" @click="aquarium.nextSlideFon()">
                     <img src="/Aquarium/right.png" alt="">
                 </button>
             </div>  
@@ -106,18 +75,21 @@ const prevSlideFish = () => {
             <p class="gs-p2">Рыбы</p>
 
             <div class="slider">   
-                <button class="control-btn" @click="prevSlideFish">
+                <button class="control-btn" @click="aquarium.prevSlideFish()">
                     <img src="/Aquarium/left.png" alt="">
                 </button>
                 <div class="slides">
                     <div class="slide">
                         <button 
-                            v-for="(slide) in slidesfish.slice(currentIndexFish, currentIndexFish + 3)" :key="slide.id" class="bgfish-btn">
+                            v-for="(slide) in visibleFishSlides" :key="slide.id" 
+                            class="bgfish-btn"
+                            :class="{ 'active-fish': aquarium.selectedFishIds.value.some(f => f.id === slide.id) }"
+                            @click="aquarium.selectFish(slide)"> 
                             <img :src="slide.src" :alt="slide.alt" />
                         </button>
                     </div>
                 </div>
-                <button class="control-btn" @click="nextSlideFish">
+                <button class="control-btn" @click="aquarium.nextSlideFish()">
                     <img src="/Aquarium/right.png" alt="">
                 </button>
             </div>
@@ -137,13 +109,20 @@ const prevSlideFish = () => {
     </div>
 
     <div class="aquarium-block">
-        <img src="/Aquarium/fon1.png" alt="фон1" />
+        <div style="position: relative; width: 935px; height: 550px;">
+            <img :src="currentFon.src" alt="фон1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+            <div 
+                v-for="fish in aquarium.selectedFishIds.value" 
+                :key="fish.id"
+                :style="aquarium.getFishStyle(fish)">
+                <img :src="fish.src" :alt="fish.alt"  style="width: 100%; height: 100%; object-fit: contain;" />
+            </div>
+        </div>
     </div>
 </div>
 </template>
 
 <style >
-
 * {
   margin: 0;
   padding: 0;
@@ -335,6 +314,10 @@ button {
     overflow: hidden; 
 }
 
+.bgfon-btn.active-fon {
+    border: 2px solid #2D78F5;
+}
+
 .bgfon-btn img {
     width: 100%;
     height: 100%;
@@ -353,6 +336,10 @@ button {
     border-radius: 10px;
     border: 2px solid #E5EAF1;
     overflow: hidden; 
+}
+
+.bgfish-btn.active-fish {
+    border: 2px solid #2D78F5;
 }
 
 .bgfish-btn img {
@@ -434,6 +421,7 @@ button {
   object-fit: cover;
   border-radius: 12px;
 }
+
 
 /* АКВАРИУМ */
 </style>
