@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
 
 const minutes = ref(25);
+const activeMinutes = ref(25);
 const secondsLeft = ref(minutes.value * 60);
 
 const isStarted = ref(false);
@@ -38,7 +39,7 @@ const progressPercent = computed(() => {
 // отслеживание изменения внешнего вида кружка таймера
 const timerStyle = computed(() => {
     return {
-        background: `conic-gradient(#3478f6 0% ${progressPercent.value}%, #edf1f7 ${progressPercent.value}% 100%)`
+        background: `conic-gradient(from -90deg, #3478f6 0% ${progressPercent.value}%, #edf1f7 ${progressPercent.value}% 100%)`
     };
 });
 
@@ -74,6 +75,7 @@ function resetTimer() {
 // изменение времени отсчёта
 function setMinutes(newMinutes) {
     minutes.value = newMinutes;
+    activeMinutes.value = newMinutes;
     resetTimer();
 };
 
@@ -94,7 +96,7 @@ function plusMinute() {
 // эскпорт всего и вся
 export default function useTimer() {
     return {
-        minutes, secondsLeft, isStarted, timeText, timerStyle,
+        minutes, activeMinutes, secondsLeft, isStarted, timeText, timerStyle,
         startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute
     };
 };

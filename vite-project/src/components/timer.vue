@@ -1,7 +1,7 @@
 <script setup>
 import useTimer from '../composables/useTimer';
 
-const { minutes, timeText, timerStyle, 
+const { minutes, timeText, timerStyle, activeMinutes,
 startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useTimer();
 </script>
 
@@ -39,10 +39,10 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
             </div>
 
             <div class="time_buttons">
-                <button class="active_button" @click="setMinutes(15)">15 мин</button>
-                <button @click="setMinutes(25)">25 мин</button>
-                <button @click="setMinutes(45)">45 мин</button>
-                <button @click="setMinutes(60)">60 мин</button>
+                <button :class="{ active_button: activeMinutes === 15 }" @click="setMinutes(15)">15 мин</button>
+                <button :class="{ active_button: activeMinutes === 25 }" @click="setMinutes(25)">25 мин</button>
+                <button :class="{ active_button: activeMinutes === 45 }" @click="setMinutes(45)">45 мин</button>
+                <button :class="{ active_button: activeMinutes === 60 }" @click="setMinutes(60)">60 мин</button>
             </div>
         </div>
     </div>
