@@ -1,4 +1,5 @@
 <script setup>
+import { RouterView } from 'vue-router';
 import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
@@ -9,6 +10,7 @@ showNotice('Тестовое уведомление', 'текст уведомл
 
 <template>
     <div class="app">
+        <RouterView />
 
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
