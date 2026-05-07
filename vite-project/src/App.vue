@@ -10,7 +10,10 @@ const router = useRouter()
 </script>
 
 <template>
-    <div><button @click="router.push({name: 'arena'})">Арена</button></div>
+    <div class="navigation">
+      <button @click="router.push({name: 'arena'})">Арена</button>
+      <button @click="router.push({name: 'aquarium'})">Аквариум</button>
+    </div>
     <div class="app">
         <RouterView />
         <!-- выведение уведомлений поверх всего -->
@@ -46,7 +49,19 @@ const router = useRouter()
     font-size: 32px;
     font-weight: 700;
 }
+.navigation button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
 
+.navigation button:hover {
+  background: #45a049;
+}
 .notice_content {
     text-align: left;
 }
