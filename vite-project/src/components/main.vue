@@ -12,11 +12,11 @@ const { tasks, deleteTask, saveTasksToStorage } = useTask();
 const activeFilter = ref('all');
 
 const filters = [
-    {name: 'Все', value: 'all'},
-    {name: 'Выполненные', value: 'done'},
-    {name: 'Активные', value: 'active'},
-    {name: 'Архив', value: 'archive'},
-    {name: 'Просроченные', value: 'expired'}
+    {name: 'Все', value: 'all', img: ''},
+    {name: 'Выполненные', value: 'done', img: ''},
+    {name: 'Активные', value: 'active', img: ''},
+    {name: 'Архив', value: 'archive', img: ''},
+    {name: 'Просроченные', value: 'expired', img: ''}
 ];
 
 // фильтрация задач
@@ -103,7 +103,7 @@ function openTimer() {
             <div class="filters">
 
                 <button v-for="filter in filters" class="filter_button" :class="{ active: activeFilter === filter.value }" @click="changeFilter(filter.value)">
-                    <img src="" alt="">
+                    <img :src="filter.img" alt="">
                     {{ filter.name }}
                 </button>
 
@@ -125,11 +125,11 @@ function openTimer() {
                 </span>
 
                 <button class="icon_button" @click="openEditTask(task.id)">
-                    <img src="" alt="">
+                    <img src="/icons/edit.svg" alt="Изменить">
                 </button>
 
                 <button class="icon_button" @click="remove(task.id)">
-                    <img src="" alt="">
+                    <img src="/icons/trash.svg" alt="Удалить">
                 </button>
             </div>
 
@@ -146,8 +146,8 @@ function openTimer() {
                     <button class="game_button">Перейти в игру</button>
                 </div>
                 <div class="game_stats">
-                    <span>10 <img src="" alt="Монеты"></span>
-                    <span>10 <img src="" alt="Кристаллы"></span>
+                    <span>10 <img src="/icons/coin.svg" alt="Монеты"></span>
+                    <span>10 <img src="/icons/crystal.svg" alt="Кристаллы"></span>
                 </div>
             </div>
 
@@ -171,12 +171,12 @@ function openTimer() {
                 <h3>Быстрые действия</h3>
                 <div class="quick_actions">
                     <button class="quick_button" @click="openTimer">
-                        <img src="" alt="">
+                        <img src="/icons/target.svg" alt="">
                         <span>Фокусировка</span>
                     </button>
 
                     <button class="quick_button">
-                        <img src="" alt="">
+                        <img src="/icons/award.svg" alt="">
                         <span>Достижения</span>
                     </button>
                 </div>
@@ -371,6 +371,7 @@ button {
   height: 160px;
   border-radius: 16px;
   background: #dbeafd;
+  background-image: url('/icons/aqua.svg');
   display: flex;
   align-items: center;
   justify-content: center;
