@@ -1,9 +1,7 @@
 <script setup>
-import { computed, reactive } from 'vue';
-
+import { computed, reactive, ref } from 'vue';
 import useNotice from '../composables/useNotice';
 import useTask from '../composables/useTask'
-
 const { showNotice } = useNotice();
 const { tasks, addTask, deleteTask, editTask } = useTask();
 
@@ -77,7 +75,8 @@ function archiveTask(task) {
     showNotice('Задача добавлена в архив');
 };
 
-// удаление задачи
+// удаление задачи#
+
 function remove(id) {
     deleteTask(id);
     showNotice('Задача удалена');
