@@ -1,12 +1,12 @@
 import { ref } from "vue";
 
-// Начальные данные
 const initialFishes = [
-    {id: 1, img: '/public/9c4376f25bb8b50e1a68e0179822e0c8be46a21d.png', name: 'РЫБКА', damage: '5', health: '20'},
-    {id: 2, img: '/public/521b9042ce95ddefe17abdbf17725d55b2462238.png', name: 'РЫБКА2', damage: '10', health: '20'}
+    {id: 1, img: '/Aquarium/fish4.png', name: 'РЫБКА', damage: '25', health: '20'},
+    {id: 2, img: '/Aquarium/fish3.png', name: 'РЫБКА2', damage: '10', health: '10'}
 ];
-
-// Функция загрузки рыб из localStorage
+const initialBosses = [
+    {id: 1, img: '/Aquarium/fish2.png', name: 'ЗЛАЯ РЫБКА'},
+];
 function loadFishesFromLocalStorage() {
     const savedFishes = localStorage.getItem('fishes');
     if (savedFishes) {
@@ -14,13 +14,19 @@ function loadFishesFromLocalStorage() {
     }
     return initialFishes;
 }
-
-// Создаем reactive данные
+function loadBossesFromLocalStorage() {
+    const savedFishes = localStorage.getItem('fishes');
+    if (savedFishes) {
+        return JSON.parse(savedFishes);
+    }
+    return initialBosses;
+}
 const fishList = ref(loadFishesFromLocalStorage());
+const bossList = ref(loadBossesFromLocalStorage());
 
-// Экспортируем composable
 export default function useFishman() {
     return {
-        fishList
+        fishList,
+        bossList
     };
 }

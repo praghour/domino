@@ -1,10 +1,13 @@
 <script setup>
 import task from './components/task.vue';
 import useNotice from './composables/useNotice';
+import { useRouter } from 'vue-router';
+const router = useRouter()
 const { noticeText, isNoticeVisible } = useNotice();
 </script>
 
 <template>
+    <div><button @click="router.push({name: 'arena'})">Арена</button></div>
     <div class="app">
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
