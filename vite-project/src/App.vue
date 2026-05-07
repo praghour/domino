@@ -1,32 +1,65 @@
 <script setup>
+import { RouterView } from 'vue-router';
 import task from './components/task.vue';
 import useNotice from './composables/useNotice';
+
+const { notice, isNoticeVisible, showNotice } = useNotice();
+showNotice('Тестовое уведомление', 'текст уведомления длииииииииииииинный');
 import { useRouter } from 'vue-router';
 const router = useRouter()
-const { noticeText, isNoticeVisible } = useNotice();
 </script>
 
 <template>
     <div><button @click="router.push({name: 'arena'})">Арена</button></div>
     <div class="app">
+        <RouterView />
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
-        {{ noticeText }}
+            <div class="notice_icon">⚠</div>
+            <div class="notice_content">
+                <div class="notice_title">{{ notice.title }}</div>
+                <div class="notice_description">{{ notice.description }}</div>
+            </div>
         </div>
     </div>
-    <RouterView></RouterView>
 </template>
 
 <style scoped>
 .notice_box {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.75);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  z-index: 1000;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 420px;
+    padding: 14px 18px;
+    background: #fff7ec;
+    border: 2px solid #d8dee8;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 1000;
+}
+
+.notice_icon {
+    color: #6b778c;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.notice_content {
+    text-align: left;
+}
+
+.notice_title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.notice_description {
+    margin-top: 4px;
+    font-size: 16px;
+    color: #6b778c;
 }
 </style>
