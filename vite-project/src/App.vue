@@ -4,8 +4,6 @@ import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
 const { notice, isNoticeVisible, showNotice } = useNotice();
-
-showNotice('Тестовое уведомление', 'текст уведомления длииииииииииииинный');
 </script>
 
 <template>
