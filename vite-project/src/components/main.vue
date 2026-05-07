@@ -91,6 +91,11 @@ function openEditTask(taskId) {
     router.push({name: 'taskEdit', params: {id: taskId}});
 };
 
+// переход к аквариуму
+function openAquarium() {
+    router.push({name: 'aquarium'});
+};
+
 // переход к таймеру
 function openTimer() {
     router.push({name: 'timer'});
@@ -143,7 +148,7 @@ function openTimer() {
             <div class="side_block">
                 <h3>Аквариум</h3>
                 <div class="aquarium">
-                    <button class="game_button">Перейти в игру</button>
+                    <button class="game_button" @click="openAquarium">Перейти в игру</button>
                 </div>
                 <div class="game_stats">
                     <span>10 <img src="/icons/coin.svg" alt="Монеты"></span>
