@@ -1,12 +1,12 @@
 <script setup>
 import { reactive, watch } from 'vue';
+import useTask from '../composables/useTask';
 
 const props = defineProps({
     modelValue: {
         type: Boolean,
         default: false
     },
-
     task: {
         type: Object,
         default: null
@@ -14,6 +14,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'save']);
+
+const { prepareTaskData } = useTask();
 
 const form = reactive({
     name: '',
@@ -117,20 +119,13 @@ function saveTask() {
         return;
     };
 
-    const editedTask = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        subtasks: form.subtasks
-            .map((subtask) => subtask.trim())
-            .filter((subtask) => subtask !== ''),
-        date: form.date,
-        priority: form.priority
-    };
+    const editedTask = prepareTaskData(form);
 
     emit('save', editedTask);
     emit('update:modelValue', false);
 };
 </script>
+
 
 <template>
     <div v-if="props.modelValue" class="modal_overlay" @click.self="closeModal">
