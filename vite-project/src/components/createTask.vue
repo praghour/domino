@@ -1,5 +1,6 @@
 <script setup>
 import { reactive } from 'vue';
+import useTask from '../composables/useTask';
 
 const props = defineProps({
     modelValue: {
@@ -8,7 +9,9 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'create']);
+const emit = defineEmits(['update:modelValue']);
+
+const { addTask, getTodayDate } = useTask();
 
 const form = reactive({
     name: '',
@@ -23,17 +26,6 @@ const errors = reactive({
     date: '',
     priority: ''
 });
-
-// сегодняшняя дата
-function getTodayDate() {
-    const date = new Date();
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-};
 
 // выбор приоритета
 function choosePriority(priority) {
@@ -54,15 +46,12 @@ function validateForm() {
     if (!form.name.trim()) {
         errors.name = 'Введите название задачи';
     };
-
     if (!form.date) {
         errors.date = 'Выберите дату';
     };
-
     if (form.date && form.date < getTodayDate()) {
         errors.date = 'Дата не может быть в прошлом';
     };
-
     if (!form.priority) {
         errors.priority = 'Выберите приоритет';
     };
@@ -93,25 +82,14 @@ function createTask() {
         return;
     };
 
-    const newTask = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        subtasks: form.subtasks
-            .map((subtask) => subtask.trim())
-            .filter((subtask) => subtask !== ''),
-        date: form.date,
-        priority: form.priority,
-        isDone: false,
-        isArchive: false,
-        isExpired: false
-    };
-
-    emit('create', newTask);
+    addTask(form);
 
     resetForm();
+
     emit('update:modelValue', false);
 };
 </script>
+
 
 <template>
     <div v-if="props.modelValue" class="modal_overlay" @click.self="closeModal">
