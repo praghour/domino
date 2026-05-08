@@ -44,3 +44,71 @@ export default function useFishman() {
         bossList
     };
 }
+
+
+// import { ref, watch } from "vue";
+// import { slidesfish } from "./useAquarium.js";
+
+// const arenaSlides = ref(slidesfish.value.map(fish => ({
+//   ...fish,
+//   name: "Название",
+//   ability: "Способность"
+// })));
+
+// const currentIndexArena = ref(0);
+// const selectedArenaIds = ref([]);
+
+// // загрузка из localStorage
+// const savedSelectedArenaIds = localStorage.getItem("arena_selectedArenaIds");
+// if (savedSelectedArenaIds) {
+//   selectedArenaIds.value = JSON.parse(savedSelectedArenaIds);
+// }
+
+// // следим за изменениями
+// watch(selectedArenaIds, (newVal) => {
+//   const toSave = newVal.map(card => ({
+//     id: card.id,
+//     src: card.src,
+//     alt: card.alt,
+//     name: card.name,
+//     ability: card.ability
+//   }));
+//   localStorage.setItem("arena_selectedArenaIds", JSON.stringify(toSave));
+// }, { deep: true });
+
+// // переключения для арены
+// function nextSlideArena() {
+//   if (currentIndexArena.value + 3 < arenaSlides.value.length) {
+//     currentIndexArena.value++;
+//   }
+// }
+
+// function prevSlideArena() {
+//   if (currentIndexArena.value > 0) {
+//     currentIndexArena.value--;
+//   }
+// }
+
+// // выбор карточки арены
+// function selectArenaCard(card) {
+//   const index = selectedArenaIds.value.findIndex(a => a.id === card.id);
+//   if (index === -1) {
+//     selectedArenaIds.value.push(card);
+//   } else {
+//     selectedArenaIds.value.splice(index, 1);
+//   }
+// }
+
+// export default function useArena() {
+//   return {
+//     arenaSlides,
+//     currentIndexArena,
+//     selectedArenaIds,
+//     nextSlideArena,
+//     prevSlideArena,
+//     selectArenaCard,
+//     arenaSlides,
+//     currentIndexArena,
+//     selectedArenaIds
+//   };
+// }
