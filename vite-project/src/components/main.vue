@@ -12,11 +12,11 @@ const { tasks, deleteTask, saveTasksToStorage } = useTask();
 const activeFilter = ref('all');
 
 const filters = [
-    {name: 'Все', value: 'all', img: ''},
-    {name: 'Выполненные', value: 'done', img: ''},
-    {name: 'Активные', value: 'active', img: ''},
-    {name: 'Архив', value: 'archive', img: ''},
-    {name: 'Просроченные', value: 'expired', img: ''}
+    {name: 'Все', value: 'all', img: '/icons/all.svg'},
+    {name: 'Выполненные', value: 'done', img: '/icons/done.svg'},
+    {name: 'Активные', value: 'active', img: '/icons/active.svg'},
+    {name: 'Архив', value: 'archive', img: '/icons/archive.svg'},
+    {name: 'Просроченные', value: 'expired', img: '/icons/expired.svg'}
 ];
 
 // фильтрация задач
