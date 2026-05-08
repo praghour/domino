@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 
 const slidesfon = ref([
   { id: 1, src: "/Aquarium/fon1.png", alt: "фон 1" },
@@ -12,17 +12,24 @@ const slidesfon = ref([
 const currentIndexFon = ref(0);
 const selectedFonId = ref(1);
 
-export const slidesfish = ref([
-  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1" },
-  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2" },
-  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3" },
-  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4" },
-  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5" },
-  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6" },
-  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7" },
-  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8" },
-  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9" }
+// Базовая коллекция всех рыб (для справки)
+export const allFish = ref([
+  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", name: 'Рыба1', damage: 10, health: 20, rarity: 'common' },
+  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", name: 'Рыба2', damage: 10, health: 20, rarity: 'common' },
+  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", name: 'Рыба3', damage: 10, health: 20, rarity: 'common' },
+  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", name: 'Рыба4', damage: 10, health: 20, rarity: 'rare' },
+  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", name: 'Рыба5', damage: 10, health: 20, rarity: 'rare' },
+  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", name: 'Рыба6', damage: 10, health: 20, rarity: 'rare' },
+  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", name: 'Рыба7', damage: 10, health: 20, rarity: 'legendary' },
+  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", name: 'Рыба8', damage: 10, health: 20, rarity: 'legendary' },
+  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", name: 'Рыба9', damage: 10, health: 20, rarity: 'legendary' }
 ]);
+
+// Доступные рыбы (только выбитые) - будет обновляться из useGacha
+const availableFishIds = ref([]);
+const availableFish = computed(() => {
+  return allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
+});
 
 const currentIndexFish = ref(0);
 const selectedFishIds = ref([]);
@@ -34,12 +41,8 @@ const savedSlidesfon = localStorage.getItem("aquarium_slidesfon");
 const savedSelectedFonId = localStorage.getItem("aquarium_selectedFonId");
 const savedSelectedFishIds = localStorage.getItem("aquarium_selectedFishIds");
 
-if (savedSlidesfon) {
-  slidesfon.value = JSON.parse(savedSlidesfon);
-}
-if (savedSelectedFonId) {
-  selectedFonId.value = JSON.parse(savedSelectedFonId);
-}
+if (savedSlidesfon) slidesfon.value = JSON.parse(savedSlidesfon);
+if (savedSelectedFonId) selectedFonId.value = JSON.parse(savedSelectedFonId);
 if (savedSelectedFishIds) {
   const saved = JSON.parse(savedSelectedFishIds);
   selectedFishIds.value = saved.map(fish => ({
@@ -50,6 +53,11 @@ if (savedSelectedFishIds) {
     speedY: (Math.random() - 0.5) * 3,
     mirrored: fish.mirrored || false
   }));
+}
+
+// Функция для обновления доступных рыб (вызывается из вне)
+function updateAvailableFish(winFishIds) {
+  availableFishIds.value = winFishIds;
 }
 
 // Следим за изменениями
@@ -71,38 +79,26 @@ watch(selectedFishIds, (newVal) => {
   localStorage.setItem("aquarium_selectedFishIds", JSON.stringify(toSave));
 }, { deep: true });
 
-// выбор фона
 function selectFon(slide) {
   selectedFonId.value = slide.id;
 }
 
-// переключения для фона
 function nextSlideFon() {
-  if (currentIndexFon.value + 3 < slidesfon.value.length) {
-    currentIndexFon.value++;
-  }
+  if (currentIndexFon.value + 3 < slidesfon.value.length) currentIndexFon.value++;
 }
 
 function prevSlideFon() {
-  if (currentIndexFon.value > 0) {
-    currentIndexFon.value--;
-  }
+  if (currentIndexFon.value > 0) currentIndexFon.value--;
 }
 
-// переключения для рыб
 function nextSlideFish() {
-  if (currentIndexFish.value + 3 < slidesfish.value.length) {
-    currentIndexFish.value++;
-  }
+  if (currentIndexFish.value + 3 < availableFish.value.length) currentIndexFish.value++;
 }
 
 function prevSlideFish() {
-  if (currentIndexFish.value > 0) {
-    currentIndexFish.value--;
-  }
+  if (currentIndexFish.value > 0) currentIndexFish.value--;
 }
 
-// выбор рыбы
 function selectFish(fish) {
   const index = selectedFishIds.value.findIndex(f => f.id === fish.id);
   if (index === -1) {
@@ -119,7 +115,6 @@ function selectFish(fish) {
   }
 }
 
-// движение рыб
 function moveFishes() {
   selectedFishIds.value.forEach(fish => {
     fish.x += fish.speedX;
@@ -160,9 +155,7 @@ function getFishStyle(fish) {
 }
 
 function startAnimation() {
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-  }
+  if (animationId) cancelAnimationFrame(animationId);
   animationId = requestAnimationFrame(moveFishes);
 }
 
@@ -173,13 +166,12 @@ function stopAnimation() {
   }
 }
 
-
 export default function useAquarium() {
   return {
     slidesfon,
     currentIndexFon,
     selectedFonId,
-    slidesfish,
+    availableFish,
     currentIndexFish,
     selectedFishIds,
     selectFon,
@@ -191,10 +183,6 @@ export default function useAquarium() {
     getFishStyle,
     startAnimation,
     stopAnimation,
-    slidesfon,
-    currentIndexFon,
-    selectedFonId,
-    currentIndexFish,
-    selectedFishIds
+    updateAvailableFish
   };
 }
