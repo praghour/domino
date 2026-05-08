@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
     achievement: {
         type: Object,
         required: true
@@ -10,26 +10,26 @@ defineProps({
 <template>
     <div class="achievement_card">
         <div class="achievement_top">
-            <div class="achievement_icon" :class="achievement.color">
-                <img :src="achievement.image" :alt="achievement.title">
+            <div class="achievement_icon" :class="props.achievement.color">
+                <img :src="props.achievement.image" :alt="props.achievement.title">
             </div>
 
             <div>
-                <h3>{{ achievement.title }}</h3>
-                <p>{{ achievement.description }}</p>
+                <h3>{{ props.achievement.title }}</h3>
+                <p>{{ props.achievement.description }}</p>
             </div>
         </div>
 
-        <div v-if="achievement.isReceived === true" class="received">
+        <div v-if="props.achievement.isReceived === true" class="received">
             Получено
         </div>
 
         <div v-else class="progress_box">
             <div class="progress_line">
-                <div class="progress_fill" :style="{ width: achievement.percent + '%' }"></div>
+                <div class="progress_fill" :style="{ width: props.achievement.percent + '%' }"></div>
             </div>
 
-            <p>{{ achievement.progress }}/{{ achievement.target }}</p>
+            <p>{{ props.achievement.progress }}/{{ props.achievement.target }}</p>
         </div>
     </div>
 </template>
