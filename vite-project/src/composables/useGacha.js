@@ -9,11 +9,11 @@ export default function usegacha() {
         let chance = Math.floor(Math.random() * 100) + 1;
         let availableFishes = [];
         if (chance <= 5) {
-            availableFishes = fishList.value.slice(0, 3);
+            availableFishes = fishList.value.slice(6, 9);
         } else if (chance <= 20) {
             availableFishes = fishList.value.slice(3, 6);
         } else {
-            availableFishes = fishList.value.slice(6, 9);
+            availableFishes = fishList.value.slice(0, 3);
         }
         if (availableFishes.length > 0) {
             const randomIndex = Math.floor(Math.random() * availableFishes.length);
@@ -22,11 +22,6 @@ export default function usegacha() {
             lastFish.value = wonFish; 
             localStorage.setItem('gachaWins', JSON.stringify(win.value));
         }
-    }
-    function clearWins() {
-        win.value = [];
-        localStorage.removeItem('gachaWins');
-        console.log("Список выигрышей очищен");
     }
     function loadWinsFromLocalStorage() {
         const savedWins = localStorage.getItem('gachaWins');
@@ -38,7 +33,6 @@ export default function usegacha() {
     return {
         gacha,
         win,
-        clearWins,
         lastFish
     };
 }

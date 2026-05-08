@@ -2,8 +2,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import useFishman from '../composables/Arena';
 
-const { fishList, bossList } = useFishman();
-
+const { party, bossList } = useFishman();
 const bossHealth = ref(100);
 const bossDamage = ref(2);
 const currentbosshp = computed(() => bossHealth.value);
@@ -15,7 +14,7 @@ const teamHP = ref(0);
 const originalTeamHP = ref(0);
 
 // Вычисляем начальное HP команды
-for (const fish of fishList.value) {
+for (const fish of party.value) {
     const hp = Number(fish.health);
     teamHP.value += hp;
     originalTeamHP.value += hp;
@@ -24,7 +23,7 @@ for (const fish of fishList.value) {
 // Общий урон рыбок
 const fishDamage = computed(() => {
     let currentdamage = 0;
-    for (const fish of fishList.value) {
+    for (const fish of party.value) {
         const dmg = Number(fish.damage);
         currentdamage += dmg;
     }
@@ -78,7 +77,7 @@ function restartFight() {
     
     // Восстанавливаем HP босса
     bossHealth.value = 100;
-    
+    bossDamage.value = 2;
     // Восстанавливаем общее HP команды
     teamHP.value = originalTeamHP.value;
     
@@ -86,19 +85,6 @@ function restartFight() {
     fight();
 }
 
-// Отслеживаем урон босса
-watch(currentbosshp, (newHp, oldHp) => {
-    if (oldHp !== undefined && newHp < oldHp) {
-        const damage = oldHp - newHp;
-        console.log(`Боссу нанесено ${damage} урона! Осталось HP: ${newHp}`);
-    }
-    
-    if (oldHp === 0 && newHp > 0) {
-        console.log(`Босс воскрес с новым HP: ${newHp}`);
-    }
-});
-
-// Запуск боя
 fight();
 
 onBeforeUnmount(() => {
@@ -112,7 +98,7 @@ onBeforeUnmount(() => {
         <div>Общее HP команды: <strong>{{ teamHP }}</strong></div>
         <div>Общий урон рыбок: {{ fishDamage }}</div>
         
-        <div v-for="value in fishList" :key="value.id" class="fish-card">
+        <div v-for="value in party" :key="value.id" class="fish-card">
             <img :src="value.img" width="50px" :alt="value.name">
             <p>{{ value.name }}</p>
             <p>Урон: {{ value.damage }}</p>

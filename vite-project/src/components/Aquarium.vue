@@ -3,11 +3,11 @@ import { useRouter } from "vue-router";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import useAquarium from "../composables/useAquarium.js";
 import usegacha from "../composables/useGacha.js";
+import useFishman from "../composables/Arena.js";
 const { gacha, win, lastFish} = usegacha();
+const { fishList, addFishtoParty, removeFishFromParty, party} = useFishman()
 const aquarium = useAquarium();
-
 const activeMode = ref("aquarium");
-
 const setActiveMode = (mode) => {
   activeMode.value = mode;
 };
@@ -36,6 +36,9 @@ const onGachaClick = () => {
     showGachaModal.value = false;
     showWinModal.value = true;
 };
+function isFishInParty(fishId) {
+  return party.value.some(fish => fish.id === fishId);
+}
 </script>
 
 <template>
@@ -165,13 +168,19 @@ const onGachaClick = () => {
         <div class="win-content">
             <img :src="lastFish.img" :alt="lastFish.alt" width="400px" class="win-fish-img">
             <h3 class="win-fish-name">{{ lastFish.name }}</h3>
+            <h3 class="win-fish-name">{{ lastFish.rarity }}</h3>
             <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
         </div>
     </div>
         </div>   
     </div>
-
 </div>
+<div v-for="value in fishList" :key="value.id" class="choosefish">
+            <img :src="value.img" alt="" height="20px">
+            <div>{{ value.name }}</div>
+            <button class="gm-btn" @click="addFishtoParty(value.id)">Добавить в отряд</button>
+            <button  v-if="isFishInParty(value.id)"  class="gm-btn" @click="removeFishFromParty(value.id)">Удалить из отряда</button>
+        </div>
 </template>
 
 <style >
