@@ -41,6 +41,24 @@ const updateTeamHP = () => {
   originalTeamHP.value = calculateTeamHP();
 };
 
+// Процент HP команды для полоски
+const teamHealthPercent = computed(() => {
+  if (originalTeamHP.value === 0) return 0;
+  return (teamHP.value / originalTeamHP.value) * 100;
+});
+
+// Процент HP босса для полоски
+const bossHealthPercent = computed(() => {
+  return (bossHealth.value / maxBossHealth.value) * 100;
+});
+
+// Цвет полоски HP в зависимости от процента
+const getHealthBarColor = (percent) => {
+  if (percent > 60) return '#4CAF50';
+  if (percent > 30) return '#FFC107';
+  return '#F44336';
+};
+
 // Общий урон рыбок
 const fishDamage = computed(() => {
   let currentdamage = 0;
@@ -308,8 +326,18 @@ function goToAquarium() {
             <div class="arena-team">
                 <h3>Ваша команда</h3>
                 <div class="team-stats">
-                    <span>HP: <strong>{{ teamHP }}</strong></span>
+                    <span>HP: <strong>{{ teamHP }} / {{ originalTeamHP }}</strong></span>
                     <span>DMG: {{ fishDamage }}</span>
+                </div>
+                <!-- Полоска HP команды -->
+                <div class="health-bar-container">
+                    <div 
+                        class="health-bar-fill"
+                        :style="{
+                            width: teamHealthPercent + '%',
+                            backgroundColor: getHealthBarColor(teamHealthPercent)
+                        }"
+                    ></div>
                 </div>
                 <div class="team-members">
                     <div v-for="fish in party" :key="fish.id" class="arena-fish-card">
@@ -323,8 +351,18 @@ function goToAquarium() {
             <div class="arena-boss">
                 <h3>БОСС</h3>
                 <div class="boss-stats">
-                    <span>HP: <strong>{{ currentbosshp }}</strong></span>
+                    <span>HP: <strong>{{ currentbosshp }} / {{ maxBossHealth }}</strong></span>
                     <span>DMG: {{ bossDamage }}</span>
+                </div>
+                <!-- Полоска HP босса -->
+                <div class="health-bar-container boss-health">
+                    <div 
+                        class="health-bar-fill"
+                        :style="{
+                            width: bossHealthPercent + '%',
+                            backgroundColor: getHealthBarColor(bossHealthPercent)
+                        }"
+                    ></div>
                 </div>
                 <div v-for="boss in bossList" :key="boss.id" class="boss-card">
                     <img :src="boss.img" width="80px" :alt="boss.name">
@@ -751,15 +789,34 @@ function goToAquarium() {
   padding: 15px;
   border-radius: 12px;
   color: white;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .team-stats {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 14px;
+}
+
+/* Стили для полосок HP */
+.health-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.health-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 5px;
+}
+
+.boss-health {
+  margin-bottom: 15px;
 }
 
 .team-members {
@@ -788,14 +845,13 @@ function goToAquarium() {
   border-radius: 12px;
   color: white;
   text-align: center;
-  min-width: 150px;
+  min-width: 170px;
 }
 
 .boss-stats {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 14px;
 }
 
