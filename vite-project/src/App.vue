@@ -1,20 +1,11 @@
 <script setup>
 import { RouterView } from 'vue-router';
-import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
-const { notice, isNoticeVisible, showNotice } = useNotice();
-
-import { useRouter } from 'vue-router';
-const router = useRouter()
-
+const { notice, isNoticeVisible } = useNotice();
 </script>
 
 <template>
-    <div class="navigation">
-      <button @click="router.push({name: 'arena'})">Арена</button>
-      <button @click="router.push({name: 'aquarium'})">Аквариум</button>
-    </div>
     <div class="app">
         <RouterView />
         <!-- выведение уведомлений поверх всего -->
@@ -60,9 +51,6 @@ const router = useRouter()
   border-radius: 5px;
 }
 
-.navigation button:hover {
-  background: #45a049;
-}
 .notice_content {
     text-align: left;
 }
