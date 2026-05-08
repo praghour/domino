@@ -2,7 +2,8 @@
 import { useRouter } from "vue-router";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import useAquarium from "../composables/useAquarium.js";
-
+import usegacha from "../composables/useGacha.js";
+const { gacha, win, lastFish} = usegacha();
 const aquarium = useAquarium();
 
 const activeMode = ref("aquarium");
@@ -22,14 +23,19 @@ const visibleFishSlides = computed(() => {
 const currentFon = computed(() => {
   return aquarium.slidesfon.value.find(f => f.id === aquarium.selectedFonId.value);
 });
-
+const showGachaModal = ref(false);
 onMounted(() => {
   aquarium.startAnimation();
 });
-
+const showWinModal = ref(false);
 onUnmounted(() => {
   aquarium.stopAnimation();
 });
+const onGachaClick = () => {
+    gacha();
+    showGachaModal.value = false;
+    showWinModal.value = true;
+};
 </script>
 
 <template>
@@ -44,7 +50,7 @@ onUnmounted(() => {
                     <p class="balance-item">10<img src="/Aquarium/crystals.png" alt=""></p>
                 </div>
             </div>
-            <button class="chest-btn">Сундуки</button>
+            <button class="chest-btn" @click="showGachaModal=ref(true)">Сундуки</button>
         </div>
 
         <div class="game-settings">
@@ -118,7 +124,53 @@ onUnmounted(() => {
                 <img :src="fish.src" :alt="fish.alt"  style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
         </div>
+        <div v-if="showGachaModal" class="overlay" @click="showGachaModal=false"></div>
     </div>
+        <div class="gacha" v-if="showGachaModal" @click.self="showGachaModal=false">
+        <div class="gacha-hed">
+            <p>Испытай удачу</p>
+            <button class="close" @click="showGachaModal=false"><img src="/gacha/close.jpg" alt=""></button>
+        </div>
+
+        <div class="balance-gacha">
+            <p>Ваш баланс</p>
+            <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+        </div>
+           <div class="select-chest">
+            <p class="ppp">Выберите сундук</p>
+        </div>
+        <div class="chest-cards">
+            <div class="chest-card">
+                <img src="/gacha/chest.png" alt="">
+                <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+                <button class="open-btn" @click="onGachaClick">Открыть</button>
+            </div>
+
+            <div class="chest-card">
+                <img src="/gacha/chest.png" alt="">
+                <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+                <button class="open-btn"  @click="onGachaClick">Открыть</button>
+            </div>
+
+            <div class="chest-card">
+                <img src="/gacha/chest.png" alt="">
+                <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+                <button class="open-btn"  @click="onGachaClick">Открыть</button>
+            </div>
+            <div v-if="showWinModal && lastFish" class="overlay" @click="showWinModal=false"></div>
+    <div class="winmodal" v-if="showWinModal && lastFish">
+        <div class="gacha-hed">
+            <button class="close" @click="showWinModal=false"><img src="/gacha/close.jpg" alt=""></button>
+        </div>
+        <div class="win-content">
+            <img :src="lastFish.img" :alt="lastFish.alt" width="400px" class="win-fish-img">
+            <h3 class="win-fish-name">{{ lastFish.name }}</h3>
+            <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
+        </div>
+    </div>
+        </div>   
+    </div>
+
 </div>
 </template>
 
@@ -128,6 +180,198 @@ onUnmounted(() => {
   padding: 0;
   box-sizing: border-box;
 }
+/* КАКИШ ВЫШЕ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  backdrop-filter: blur(5px);
+}
+/* ГАЧА СТИЛИ */
+.gacha {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 725px;
+    height: 473px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    color: black;
+    z-index: 1000;
+}
+
+.winmodal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: auto;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    color: rgb(0, 0, 0);
+    z-index: 1001;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: bounceIn 0.5s ease;
+}
+
+.win-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.win-fish-img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    animation: float 3s ease-in-out infinite;
+}
+
+.win-fish-name {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.close-win-btn {
+    padding: 10px 30px;
+    background: white;
+    color: #764ba2;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.close-win-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.balance-gacha {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.balance-gacha p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.balance-gacha .balance-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.gacha-hed {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gacha-hed p {
+    font-size: 24px;
+    margin: 0;
+}
+
+.close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.close img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.select-chest {
+    margin-top: 20px;
+}
+
+.select-chest p {
+    color: #67758A;
+    font-size: 16px;
+    text-align: left;
+}
+/* КАКИШ ВЫШЕ */
+
+/* СУНДУКИ */
+.chest-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.chest-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border-radius: 16px;
+    padding: 15px;
+    width: 221px;
+}
+
+.chest-card img {
+    width: 221px;
+    height: 200px;
+    object-fit: contain;
+}
+
+.chest-card .balance-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.open-btn {
+    width: 99px;
+    height: 43px;
+    background-color: #EFF3F8;
+    color: #66748A;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.open-btn:hover {
+    background-color: #2D78F5;
+    color: #FEFEFE;
+}
+
+/* СУНДУКИ */
 
 body {
   background-color: #ffffff;
@@ -146,9 +390,6 @@ body {
   align-items: center;
 }
 
-.page p {
-    color: black;
-}
 
 .sidebar {
   display: flex;

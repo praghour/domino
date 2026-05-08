@@ -4,12 +4,19 @@ import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
 const { notice, isNoticeVisible, showNotice } = useNotice();
+
+import { useRouter } from 'vue-router';
+const router = useRouter()
+
 </script>
 
 <template>
+    <div class="navigation">
+      <button @click="router.push({name: 'arena'})">Арена</button>
+      <button @click="router.push({name: 'aquarium'})">Аквариум</button>
+    </div>
     <div class="app">
         <RouterView />
-
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
             <div class="notice_icon">⚠</div>
@@ -43,7 +50,19 @@ const { notice, isNoticeVisible, showNotice } = useNotice();
     font-size: 32px;
     font-weight: 700;
 }
+.navigation button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
 
+.navigation button:hover {
+  background: #45a049;
+}
 .notice_content {
     text-align: left;
 }

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-
+import DEATHARENA from "./components/DEATHARENA.vue";
 import main from "./components/main.vue";
 import task from "./components/task.vue";
 import taskForm from "./components/taskForm.vue";
@@ -11,6 +11,7 @@ const routes = [
     {path: '/task/:id([0-9]+)', component: task, name: 'task', children: [
         {path: 'form', component: taskForm, name: 'taskForm'}
     ]},
+    {path: '/DEATHARENA', component: DEATHARENA, name: 'arena'},
     {path: '/Aquarium', component: Aquarium, name: 'aquarium'},
     {path: '/timer', component: timer, name: 'timer'}
 ];

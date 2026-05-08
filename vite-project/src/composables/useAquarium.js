@@ -1,6 +1,6 @@
 import { ref, watch } from "vue";
 
-export const slidesfon = ref([
+const slidesfon = ref([
   { id: 1, src: "/Aquarium/fon1.png", alt: "фон 1" },
   { id: 2, src: "/Aquarium/fon2.png", alt: "фон 2" },
   { id: 3, src: "/Aquarium/fon3.png", alt: "фон 3" },
@@ -9,8 +9,8 @@ export const slidesfon = ref([
   { id: 6, src: "/Aquarium/fon6.png", alt: "фон 6" }
 ]);
 
-export const currentIndexFon = ref(0);
-export const selectedFonId = ref(1);
+const currentIndexFon = ref(0);
+const selectedFonId = ref(1);
 
 export const slidesfish = ref([
   { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1" },
@@ -24,8 +24,8 @@ export const slidesfish = ref([
   { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9" }
 ]);
 
-export const currentIndexFish = ref(0);
-export const selectedFishIds = ref([]);
+const currentIndexFish = ref(0);
+const selectedFishIds = ref([]);
 
 let animationId = null;
 
@@ -190,6 +190,11 @@ export default function useAquarium() {
     selectFish,
     getFishStyle,
     startAnimation,
-    stopAnimation
+    stopAnimation,
+    slidesfon,
+    currentIndexFon,
+    selectedFonId,
+    currentIndexFish,
+    selectedFishIds
   };
 }

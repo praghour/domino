@@ -1,9 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, reactive, ref } from 'vue';
 import useNotice from '../composables/useNotice';
-import useTask from '../composables/useTask';
-
+import useTask from '../composables/useTask'
+  
 const router = useRouter();
 
 const { showNotice } = useNotice();
@@ -75,7 +74,13 @@ function completeTask(task) {
     };
 };
 
-// удаление задачи
+// архивирование задачи
+function archiveTask(task) {
+    task.isArchive = true;
+    saveTasksToStorage();
+    showNotice('Задача добавлена в архив');
+};
+
 function remove(id) {
     deleteTask(id);
     showNotice('Задача удалена', 'Задача убрана из списка');
