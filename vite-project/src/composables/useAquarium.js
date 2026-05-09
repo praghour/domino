@@ -1,4 +1,7 @@
 import { ref, watch, computed } from "vue";
+import useFishman from './Arena.js';
+
+const { playerFishCollection } = useFishman();
 
 const slidesfon = ref([
   { id: 1, src: "/Aquarium/fon1.png", alt: "фон 1" },
@@ -12,23 +15,35 @@ const slidesfon = ref([
 const currentIndexFon = ref(0);
 const selectedFonId = ref(1);
 
-// Базовая коллекция всех рыб (для справки)
 export const allFish = ref([
-  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", name: 'Рыба1', damage: 10, health: 20, rarity: 'common' },
-  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", name: 'Рыба2', damage: 10, health: 20, rarity: 'common' },
-  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", name: 'Рыба3', damage: 10, health: 20, rarity: 'common' },
-  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", name: 'Рыба4', damage: 10, health: 20, rarity: 'rare' },
-  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", name: 'Рыба5', damage: 10, health: 20, rarity: 'rare' },
-  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", name: 'Рыба6', damage: 10, health: 20, rarity: 'rare' },
-  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", name: 'Рыба7', damage: 10, health: 20, rarity: 'legendary' },
-  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", name: 'Рыба8', damage: 10, health: 20, rarity: 'legendary' },
-  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", name: 'Рыба9', damage: 10, health: 20, rarity: 'legendary' }
+  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 10, health: 20, name: 'Рыба1', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "claw", lvl: 1 },
+  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 10, health: 20, name: 'Рыба2', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "chew", lvl: 1 },
+  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", damage: 10, health: 20, name: 'Рыба3', rarity: 'common', abilitytype: 'heal', abilityvalue: 5, ability: "feed", lvl: 1 },
+  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", damage: 10, health: 20, name: 'Рыба4', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "jaw", lvl: 1 },
+  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", damage: 10, health: 20, name: 'Рыба5', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "punch", lvl: 1 },
+  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", damage: 10, health: 20, name: 'Рыба6', rarity: 'rare', abilitytype: 'heal', abilityvalue: 10, ability: "brbrpatapims", lvl: 1 },
+  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", damage: 10, health: 20, name: 'Рыба7', rarity: 'legendary', abilitytype: 'heal', abilityvalue: 20, ability: "kiss", lvl: 1 },
+  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", damage: 10, health: 20, name: 'Рыба8', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "lowkick", lvl: 1 },
+  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Рыба9', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
 ]);
 
-// Доступные рыбы (только выбитые) - будет обновляться из useGacha
 const availableFishIds = ref([]);
 const availableFish = computed(() => {
-  return allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
+  const fishList = allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
+  
+  return fishList.map(fish => {
+    const playerFish = playerFishCollection.value[fish.id];
+    if (playerFish) {
+      return {
+        ...fish,
+        lvl: playerFish.lvl || fish.lvl,
+        damage: playerFish.damage || fish.damage,
+        health: playerFish.health || fish.health,
+        abilityvalue: playerFish.abilityvalue || fish.abilityvalue,
+      };
+    }
+    return fish;
+  });
 });
 
 const currentIndexFish = ref(0);
@@ -36,7 +51,6 @@ const selectedFishIds = ref([]);
 
 let animationId = null;
 
-// загрузка из localStorage
 const savedSlidesfon = localStorage.getItem("aquarium_slidesfon");
 const savedSelectedFonId = localStorage.getItem("aquarium_selectedFonId");
 const savedSelectedFishIds = localStorage.getItem("aquarium_selectedFishIds");
@@ -55,12 +69,19 @@ if (savedSelectedFishIds) {
   }));
 }
 
-// Функция для обновления доступных рыб (вызывается из вне)
+function syncAvailableFishWithCollection() {
+  const fishIds = Object.keys(playerFishCollection.value).map(id => Number(id));
+  availableFishIds.value = fishIds;
+}
+
+watch(playerFishCollection, () => {
+  syncAvailableFishWithCollection();
+}, { deep: true, immediate: true });
+
 function updateAvailableFish(winFishIds) {
   availableFishIds.value = winFishIds;
 }
 
-// Следим за изменениями
 watch(slidesfon, (newVal) => {
   localStorage.setItem("aquarium_slidesfon", JSON.stringify(newVal));
 }, { deep: true });

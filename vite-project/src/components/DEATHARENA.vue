@@ -6,10 +6,10 @@ import useAquarium from '../composables/useAquarium.js';
 import useGacha from '../composables/useGacha.js';
 
 const router = useRouter();
-const { party, bossList, addFishtoParty, removeFishFromParty, fishList } = useFishman();
+const { party, bossList, addFishtoParty, removeFishFromParty, fishList, addOrUpdateFish } = useFishman();
 const { gacha, win, lastFish } = useGacha();
 const aquarium = useAquarium();
-
+const maxTeamHP = computed(() => calculateTeamHP()); // <-- ДОБАВИТЬ ЭТО
 // Обновляем доступных рыб в аквариуме при изменении win
 watch(win, (newWin) => {
   const winIds = newWin.map(fish => fish.id);
@@ -24,9 +24,27 @@ const maxBossHealth = ref(100);
 const teamHP = ref(0);
 const originalTeamHP = ref(0);
 const isFighting = ref(false);
+const bosslvl = ref(1)
 let fightInterval = null;
+const abilitydamage = computed(() => {
+  let totalDamage = 0;
+  for (const fishy of party.value) {
+    if (fishy.abilitytype === 'damage') {  // тип способности у каждой рыбки
+      totalDamage += Number(fishy.abilityvalue) || 0;
+    }
+  }
+  return totalDamage;
+});
 
-// Вычисляем начальное HP команды
+const abilityheal = computed(() => {
+  let totalHeal = 0;
+  for (const fishy of party.value) {
+    if (fishy.abilitytype === 'heal') {  // тип способности у каждой рыбки
+      totalHeal += Number(fishy.abilityvalue) || 0;
+    }
+  }
+  return totalHeal;
+});
 const calculateTeamHP = () => {
   let total = 0;
   for (const fish of party.value) {
@@ -39,6 +57,24 @@ const calculateTeamHP = () => {
 const updateTeamHP = () => {
   teamHP.value = calculateTeamHP();
   originalTeamHP.value = calculateTeamHP();
+};
+
+// Процент HP команды для полоски
+const teamHealthPercent = computed(() => {
+  if (originalTeamHP.value === 0) return 0;
+  return (teamHP.value / originalTeamHP.value) * 100;
+});
+
+// Процент HP босса для полоски
+const bossHealthPercent = computed(() => {
+  return (bossHealth.value / maxBossHealth.value) * 100;
+});
+
+// Цвет полоски HP в зависимости от процента
+const getHealthBarColor = (percent) => {
+  if (percent > 60) return '#4CAF50';
+  if (percent > 30) return '#FFC107';
+  return '#F44336';
 };
 
 // Общий урон рыбок
@@ -71,6 +107,8 @@ function fight() {
   
   fightInterval = setInterval(() => {
     if (!isFighting.value) return;
+    
+    // Проверка жива ли команда перед атакой
     if (teamHP.value <= 0) {
       stopFight();
       return;
@@ -78,21 +116,25 @@ function fight() {
     
     // 1. Рыбки атакуют босса
     const totalFishDmg = fishDamage.value;
-    bossHealth.value = Math.max(0, bossHealth.value - totalFishDmg);
+    const totalabilitydmg = abilitydamage.value;
+    const totalabilityheal = abilityheal.value;
+    bossHealth.value = Math.max(0, bossHealth.value - totalFishDmg - totalabilitydmg);
     
     // 2. Проверка на смерть босса
     if (bossHealth.value <= 0) {
       maxBossHealth.value += 25;
       bossHealth.value = maxBossHealth.value;  
       bossDamage.value = bossDamage.value + 2;
+      bosslvl.value = bosslvl.value +1;
       console.log('Босс возродился с новыми силами! HP:', maxBossHealth.value, 'Урон:', bossDamage.value);
+      return;
     }
     
-    // 3. Босс атакует (уменьшает общее HP команды)
-    if (teamHP.value > 0 && bossHealth.value > 0) {
-      teamHP.value = Math.max(0, teamHP.value - bossDamage.value);
+   if (teamHP.value > 0) {
+      let newTeamHP = Math.min(teamHP.value + totalabilityheal, maxTeamHP.value);
+      newTeamHP = newTeamHP - bossDamage.value;
+      teamHP.value = Math.max(0, newTeamHP);
     }
-    
     // 4. Проверка поражения
     if (teamHP.value <= 0) {
       console.log('Команда побеждена!');
@@ -126,6 +168,7 @@ function restartFight() {
   bossHealth.value = 100;
   bossDamage.value = 2;
   maxBossHealth.value = 100;
+  bosslvl.value = 1
   startFight();
 }
 
@@ -177,7 +220,11 @@ function updateSelectedArenaIds() {
     alt: fish.name,
     name: fish.name,
     damage: fish.damage,
-    health: fish.health
+    health: fish.health,
+    abilitytype: fish.abilitytype, 
+    abilityvalue: fish.abilityvalue, 
+    ability: fish.ability,
+    lvl: fish.lvl
   }));
 }
 
@@ -211,7 +258,15 @@ onBeforeUnmount(() => {
 });
 
 const onGachaClick = () => {
-  gacha();
+ gacha(); // получаем новую рыбку (lastFish)
+  
+  // ОБНОВЛЯЕМ КОЛЛЕКЦИЮ
+  if (lastFish.value) {
+    addOrUpdateFish(lastFish.value);
+  }
+  
+  const winIds = win.value.map(fish => fish.id);
+  aquarium.updateAvailableFish(winIds);
   showGachaModal.value = false;
   showWinModal.value = true;
 };
@@ -260,8 +315,7 @@ function goToAquarium() {
                                 <img :src="fish.src" :alt="fish.alt" />
                             </button>
                             <div class="arena-fish-info">
-                                <div class="fish-name">{{ fish.name || 'Название' }}</div>
-                                <div class="fish-ability">Урон: {{ fish.damage }}</div>
+                                <div class="fish-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
                             </div>
                         </div>
                     </div>
@@ -277,7 +331,7 @@ function goToAquarium() {
                 <div v-for="fish in party" :key="fish.id" class="party-item">
                     <img :src="fish.img" :alt="fish.name">
                     <div class="party-info">
-                        <div class="party-name">{{ fish.name }}</div>
+                        <div class="party-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
                         <div class="party-stats">HP{{ fish.health }} DMG{{ fish.damage }}</div>
                     </div>
                     <button class="remove-party-btn" @click="removeFromParty(fish.id)" :disabled="isFighting">✖</button>
@@ -308,8 +362,18 @@ function goToAquarium() {
             <div class="arena-team">
                 <h3>Ваша команда</h3>
                 <div class="team-stats">
-                    <span>HP: <strong>{{ teamHP }}</strong></span>
+                    <span>HP: <strong>{{ teamHP }} / {{ originalTeamHP }}</strong></span>
                     <span>DMG: {{ fishDamage }}</span>
+                </div>
+                <!-- Полоска HP команды -->
+                <div class="health-bar-container">
+                    <div 
+                        class="health-bar-fill"
+                        :style="{
+                            width: teamHealthPercent + '%',
+                            backgroundColor: getHealthBarColor(teamHealthPercent)
+                        }"
+                    ></div>
                 </div>
                 <div class="team-members">
                     <div v-for="fish in party" :key="fish.id" class="arena-fish-card">
@@ -322,9 +386,20 @@ function goToAquarium() {
             <!-- Босс (справа) -->
             <div class="arena-boss">
                 <h3>БОСС</h3>
+                <h2> УРОВЕНЬ {{ bosslvl }} </h2>
                 <div class="boss-stats">
-                    <span>HP: <strong>{{ currentbosshp }}</strong></span>
+                    <span>HP: <strong>{{ currentbosshp }} / {{ maxBossHealth }}</strong></span>
                     <span>DMG: {{ bossDamage }}</span>
+                </div>
+                <!-- Полоска HP босса -->
+                <div class="health-bar-container boss-health">
+                    <div 
+                        class="health-bar-fill"
+                        :style="{
+                            width: bossHealthPercent + '%',
+                            backgroundColor: getHealthBarColor(bossHealthPercent)
+                        }"
+                    ></div>
                 </div>
                 <div v-for="boss in bossList" :key="boss.id" class="boss-card">
                     <img :src="boss.img" width="80px" :alt="boss.name">
@@ -751,15 +826,34 @@ function goToAquarium() {
   padding: 15px;
   border-radius: 12px;
   color: white;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .team-stats {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 14px;
+}
+
+/* Стили для полосок HP */
+.health-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.health-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 5px;
+}
+
+.boss-health {
+  margin-bottom: 15px;
 }
 
 .team-members {
@@ -788,14 +882,13 @@ function goToAquarium() {
   border-radius: 12px;
   color: white;
   text-align: center;
-  min-width: 150px;
+  min-width: 170px;
 }
 
 .boss-stats {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 14px;
 }
 
