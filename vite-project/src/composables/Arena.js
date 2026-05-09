@@ -22,7 +22,11 @@ const initialFishes = ref([
 ]);
 
 const initialBosses = ref([
-  { id: 1, img: '/Aquarium/fish2.png', name: 'ЗЛАЯ РЫБКА' }
+  { id: 1, img: '/Aquarium/boss1.png', name: 'ЗЛАЯ РЫБКА1' },
+  { id: 2, img: '/Aquarium/boss2.png', name: 'ЗЛАЯ РЫБКА2' },
+  { id: 3, img: '/Aquarium/boss3.png', name: 'ЗЛАЯ РЫБКА3' },
+  { id: 4, img: '/Aquarium/boss4.png', name: 'ЗЛАЯ РЫБКА4' },
+  { id: 5, img: '/Aquarium/boss5.png', name: 'ЗЛАЯ РЫБКА5' }
 ]);
 
 function loadCollectionFromLocalStorage() {
