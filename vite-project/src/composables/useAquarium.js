@@ -1,20 +1,76 @@
 import { ref, watch, computed } from "vue";
 import useFishman from './Arena.js';
+import useMoney from './useMoney.js';
+import useNotice from './useNotice.js';
 
 const { playerFishCollection } = useFishman();
+const { findCurrency, spendCurrency } = useMoney();
+const { showNotice } = useNotice();
 
+// ФОНЫ с ценами
 const slidesfon = ref([
-  { id: 1, src: "/Aquarium/fon1.png", alt: "фон 1" },
-  { id: 2, src: "/Aquarium/fon2.png", alt: "фон 2" },
-  { id: 3, src: "/Aquarium/fon3.png", alt: "фон 3" },
-  { id: 4, src: "/Aquarium/fon4.png", alt: "фон 4" },
-  { id: 5, src: "/Aquarium/fon5.png", alt: "фон 5" },
-  { id: 6, src: "/Aquarium/fon6.png", alt: "фон 6" }
+  { id: 1, src: "/Aquarium/fon1.png", alt: "Солнечный риф", name: "Солнечный риф", price: 0 },
+  { id: 2, src: "/Aquarium/fon2.png", alt: "Крушение у киклад", name: "Крушение у киклад", price: 10 },
+  { id: 3, src: "/Aquarium/fon3.png", alt: "Жемчужные кварталы", name: "Жемчужные кварталы", price: 20 },
+  { id: 4, src: "/Aquarium/fon4.png", alt: "Лиловая бездна", name: "Лиловая бездна", price: 30 },
+  { id: 5, src: "/Aquarium/fon5.png", alt: "Тень исполина", name: "Тень исполина", price: 40 },
+  { id: 6, src: "/Aquarium/fon6.png", alt: "Олимп под волной", name: "Олимп под волной", price: 80 }
 ]);
 
 const currentIndexFon = ref(0);
 const selectedFonId = ref(1);
 
+// Купленные фоны (первый открыт по умолчанию)
+const savedUnlockedFonIds = localStorage.getItem("unlockedFonIds");
+const unlockedFonIds = ref(savedUnlockedFonIds ? JSON.parse(savedUnlockedFonIds) : [1]);
+
+// Проверка - открыт ли фон
+function isFonUnlocked(fonId) {
+  return unlockedFonIds.value.includes(fonId);
+}
+
+// Покупка фона
+function buyFon(slide) {
+  if (isFonUnlocked(slide.id)) {
+    showNotice('Информация', 'Этот фон уже куплен!');
+    return false;
+  }
+  
+  const crystals = findCurrency('crystal');
+  const price = slide.price;
+  
+  if (!crystals || crystals.count < price) {
+    showNotice('Ошибка', `Недостаточно кристаллов! Нужно ${price} кристаллов для покупки фона.`);
+    return false;
+  }
+  
+  const success = spendCurrency('crystal', price);
+  
+  unlockedFonIds.value.push(slide.id);
+  localStorage.setItem("unlockedFonIds", JSON.stringify(unlockedFonIds.value));
+  showNotice('Успех', `Фон "${slide.name}" куплен!`);
+  return true;
+}
+
+// Выбор фона (только если открыт)
+function selectFon(slide) {
+  if (!isFonUnlocked(slide.id)) {
+    showNotice('Заблокировано', `Фон "${slide.name}" заблокирован! Купите его за ${slide.price} кристаллов.`);
+    return;
+  }
+  selectedFonId.value = slide.id;
+  localStorage.setItem("aquarium_selectedFonId", JSON.stringify(selectedFonId.value));
+}
+
+// slidesfon с флагом isUnlocked для отображения в слайдере
+const slidesfonWithStatus = computed(() => {
+  return slidesfon.value.map(fon => ({
+    ...fon,
+    isUnlocked: isFonUnlocked(fon.id)
+  }));
+});
+
+// ВСЕ РЫБЫ
 export const allFish = ref([
   { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 10, health: 20, name: 'Рыба1', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "claw", lvl: 1 },
   { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 10, health: 20, name: 'Рыба2', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "chew", lvl: 1 },
@@ -27,6 +83,7 @@ export const allFish = ref([
   { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Рыба9', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
 ]);
 
+// ДОСТУПНЫЕ РЫБЫ (только выбитые)
 const availableFishIds = ref([]);
 const availableFish = computed(() => {
   const fishList = allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
@@ -51,11 +108,9 @@ const selectedFishIds = ref([]);
 
 let animationId = null;
 
-const savedSlidesfon = localStorage.getItem("aquarium_slidesfon");
 const savedSelectedFonId = localStorage.getItem("aquarium_selectedFonId");
 const savedSelectedFishIds = localStorage.getItem("aquarium_selectedFishIds");
 
-if (savedSlidesfon) slidesfon.value = JSON.parse(savedSlidesfon);
 if (savedSelectedFonId) selectedFonId.value = JSON.parse(savedSelectedFonId);
 if (savedSelectedFishIds) {
   const saved = JSON.parse(savedSelectedFishIds);
@@ -69,6 +124,7 @@ if (savedSelectedFishIds) {
   }));
 }
 
+// Синхронизация availableFishIds с коллекцией игрока
 function syncAvailableFishWithCollection() {
   const fishIds = Object.keys(playerFishCollection.value).map(id => Number(id));
   availableFishIds.value = fishIds;
@@ -82,14 +138,7 @@ function updateAvailableFish(winFishIds) {
   availableFishIds.value = winFishIds;
 }
 
-watch(slidesfon, (newVal) => {
-  localStorage.setItem("aquarium_slidesfon", JSON.stringify(newVal));
-}, { deep: true });
-
-watch(selectedFonId, (newVal) => {
-  localStorage.setItem("aquarium_selectedFonId", JSON.stringify(newVal));
-});
-
+// Сохранение выбранных рыб в localStorage
 watch(selectedFishIds, (newVal) => {
   const toSave = newVal.map(fish => ({
     id: fish.id,
@@ -100,18 +149,16 @@ watch(selectedFishIds, (newVal) => {
   localStorage.setItem("aquarium_selectedFishIds", JSON.stringify(toSave));
 }, { deep: true });
 
-function selectFon(slide) {
-  selectedFonId.value = slide.id;
-}
-
+// Функции слайдера фонов
 function nextSlideFon() {
-  if (currentIndexFon.value + 3 < slidesfon.value.length) currentIndexFon.value++;
+  if (currentIndexFon.value + 3 < slidesfonWithStatus.value.length) currentIndexFon.value++;
 }
 
 function prevSlideFon() {
   if (currentIndexFon.value > 0) currentIndexFon.value--;
 }
 
+// Функции слайдера рыб
 function nextSlideFish() {
   if (currentIndexFish.value + 3 < availableFish.value.length) currentIndexFish.value++;
 }
@@ -120,6 +167,7 @@ function prevSlideFish() {
   if (currentIndexFish.value > 0) currentIndexFish.value--;
 }
 
+// Добавление/удаление рыбы в аквариум
 function selectFish(fish) {
   const index = selectedFishIds.value.findIndex(f => f.id === fish.id);
   if (index === -1) {
@@ -136,6 +184,7 @@ function selectFish(fish) {
   }
 }
 
+// Анимация рыб
 function moveFishes() {
   selectedFishIds.value.forEach(fish => {
     fish.x += fish.speedX;
@@ -189,13 +238,15 @@ function stopAnimation() {
 
 export default function useAquarium() {
   return {
-    slidesfon,
+    slidesfon: slidesfonWithStatus,
     currentIndexFon,
     selectedFonId,
     availableFish,
     currentIndexFish,
     selectedFishIds,
     selectFon,
+    buyFon,
+    isFonUnlocked,
     nextSlideFon,
     prevSlideFon,
     nextSlideFish,

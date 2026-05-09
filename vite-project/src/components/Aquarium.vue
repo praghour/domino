@@ -13,12 +13,10 @@ const { fishList, addFishtoParty, removeFishFromParty, party, addOrUpdateFish } 
 const aquarium = useAquarium();
 
 // балванка для тестов 
-// Функция добавления тестовой валюты
 const addTestCurrency = () => {
   addCurrency('money', 10);
   addCurrency('crystal', 10);
 };
-// балванка для тестов 
 
 // БАБКИ
 const { findCurrency, spendCurrency, currency, addCurrency } = useMoney();
@@ -33,7 +31,6 @@ const userCrystals = computed(() => {
   const crystal = findCurrency('crystal');
   return crystal ? crystal.count : 0;
 });
-// БАБКИ
 
 // Обновляем доступных рыб в аквариуме при изменении win
 watch(win, (newWin) => {
@@ -138,7 +135,6 @@ function togglePartyList() {
   showPartyList.value = !showPartyList.value;
 }
 
-// Обновляем подсветку при изменении party
 watch(party, () => {
   updateSelectedArenaIds();
 }, { deep: true });
@@ -151,7 +147,6 @@ onMounted(() => {
   aquarium.startAnimation();
   const winIds = win.value.map(fish => fish.id);
   aquarium.updateAvailableFish(winIds);
-  
   updateSelectedArenaIds();
 });
 
@@ -162,13 +157,11 @@ onUnmounted(() => {
 const onGachaClick = () => {
   const money = findCurrency('money');
   
-  // Проверяем достаточно ли монет
   if (!money || money.count < 10) {
     showNotice('Ошибка', 'Недостаточно монет! Нужно 10 монет для открытия сундука.');
     return;
   }
   
-  // Списываем 10 монет
   const success = spendCurrency('money', 10);
   
   if (!success) {
@@ -176,9 +169,8 @@ const onGachaClick = () => {
     return;
   }
   
-  gacha(); // получаем новую рыбку (lastFish)
+  gacha();
   
-  // ОБНОВЛЯЕМ КОЛЛЕКЦИЮ
   if (lastFish.value) {
     addOrUpdateFish(lastFish.value);
   }
@@ -204,9 +196,7 @@ function closeWinModal() {
                 <div class="balance-values">
                     <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
                     <p class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></p>
-                                <!-- балванка для тестов -->
-            <button @click="addTestCurrency">+10</button>
-            <!-- балванка для тестов -->
+                    <button @click="addTestCurrency">+10</button>
                 </div>
             </div>
             <button class="chest-btn" @click="showGachaModal = true">Сундуки</button>
@@ -224,13 +214,20 @@ function closeWinModal() {
                 </button>
                 <div class="slides">
                     <div class="slide">
-                        <button 
-                            v-for="(slide) in visibleFonSlides" :key="slide.id" 
-                            class="bgfon-btn"
-                            :class="{ 'active-fon': aquarium.selectedFonId.value === slide.id }"
-                            @click="aquarium.selectFon(slide)">
-                            <img :src="slide.src" :alt="slide.alt" />
-                        </button>
+                        <div v-for="(slide) in visibleFonSlides" :key="slide.id" style="position: relative; width: 72px; height: 64px;">
+                            <button 
+                                class="bgfon-btn"
+                                :class="{ 'active-fon': aquarium.selectedFonId.value === slide.id }"
+                                @click="aquarium.selectFon(slide)">
+                                <img :src="slide.src" :alt="slide.alt" />
+                            </button>
+                            <div v-if="!slide.isUnlocked && slide.price > 0" class="fon-locked-overlay" @click.stop="aquarium.buyFon(slide)">
+                                <div class="fon-price-center">
+                                    <span class="fon-price-text">{{ slide.price }}</span>
+                                    <img src="/Aquarium/crystals.png" class="fon-price-icon" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <button class="control-btn" @click="aquarium.nextSlideFon()">
@@ -534,6 +531,7 @@ body {
   display: block;
 }
 
+
 /* Стиль для кнопки рыбок в аквариум */
 .bgfish-btn {
   width: 72px;
@@ -775,4 +773,40 @@ body {
 }
 
 
+/* ПОКУПКА ФОНОФ */
+.fon-locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.fon-price-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.fon-price-text {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.fon-price-icon {
+  width: 24px;
+  height: px;
+  object-fit: contain;
+}
+
+/* ПОКУПКА ФОНОФ */
 </style>
