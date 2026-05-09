@@ -6,7 +6,7 @@ import useGacha from "../composables/useGacha.js";
 import useFishman from "../composables/Arena.js";
 const router = useRouter()
 const { gacha, win, lastFish } = useGacha();
-const { fishList, addFishtoParty, removeFishFromParty, party } = useFishman();
+const { fishList, addFishtoParty, removeFishFromParty, party, addOrUpdateFish } = useFishman();
 const aquarium = useAquarium();
 
 // Обновляем доступных рыб в аквариуме при изменении win
@@ -96,7 +96,11 @@ function updateSelectedArenaIds() {
     alt: fish.name,
     name: fish.name,
     damage: fish.damage,
-    health: fish.health
+    health: fish.health,
+    abilitytype: fish.abilitytype, 
+    abilityvalue: fish.abilityvalue, 
+    ability: fish.ability,
+    lvl: fish.lvl
   }));
 }
 
@@ -119,19 +123,25 @@ const showWinModal = ref(false);
 
 onMounted(() => {
   aquarium.startAnimation();
-  
   const winIds = win.value.map(fish => fish.id);
   aquarium.updateAvailableFish(winIds);
   
   updateSelectedArenaIds();
 });
-
 onUnmounted(() => {
   aquarium.stopAnimation();
 });
 
 const onGachaClick = () => {
-  gacha();
+  gacha(); // получаем новую рыбку (lastFish)
+  
+  // ОБНОВЛЯЕМ КОЛЛЕКЦИЮ
+  if (lastFish.value) {
+    addOrUpdateFish(lastFish.value);
+  }
+  
+  const winIds = win.value.map(fish => fish.id);
+  aquarium.updateAvailableFish(winIds);
   showGachaModal.value = false;
   showWinModal.value = true;
 };
@@ -213,15 +223,14 @@ function closeWinModal() {
                 <div class="slides-arena">
                     <div class="slide-arena">
                         <div 
-                            v-for="(fish) in visibleArenaSlides" :key="fish.id" class="arena-item"> 
+                            v-for="fish in visibleArenaSlides" :key="fish.id" class="arena-item"> 
                             <button class="arena-fish-btn"
                                 :class="{ 'active-arena': isFishInParty(fish.id) }"
                                 @click="selectArenaCard(fish)">
                                 <img :src="fish.src" :alt="fish.alt" />
                             </button>
                             <div class="arena-fish-info">
-                                <div class="fish-name">{{ fish.name || 'Название' }}</div>
-                                <div class="fish-ability">Урон: {{ fish.damage }}</div>
+                                <div class="fish-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
                             </div>
                         </div>
                     </div>
@@ -245,7 +254,7 @@ function closeWinModal() {
                 <div v-for="fish in party" :key="fish.id" class="party-item">
                     <img :src="fish.img"  :alt="fish.name">
                     <div class="party-info">
-                        <div class="party-name">{{ fish.name }}</div>
+                        <div class="party-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
                         <div class="party-stats">HP{{ fish.health }} DMG{{ fish.damage }}</div>
                     </div>
                     <button class="remove-party-btn" @click="removeFromParty(fish.id)">X</button>
