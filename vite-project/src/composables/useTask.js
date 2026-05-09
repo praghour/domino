@@ -2,21 +2,41 @@ import { computed, reactive } from 'vue';
 
 // default список задач для проверок и тестов
 const defaultTaskList = [
-    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий'},
-    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний'},
-    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий'},
-    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий'},
-    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний'},
-    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий'},
-    {id: 6, name: 'Задача 7', description: 'Сделать раз', priority: 'Низкий'},
-    {id: 7, name: 'Задача 8', description: 'Сделать два', priority: 'Средний'},
-    {id: 8, name: 'Задача 9', description: 'Сделать три', priority: 'Высокий'},
-    {id: 9, name: 'Задача 10', description: 'Сделать раз', priority: 'Низкий'},
-    {id: 10, name: 'Задача 11', description: 'Сделать два', priority: 'Средний'},
-    {id: 11, name: 'Задача 12', description: 'Сделать три', priority: 'Высокий'}
+    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 6, name: 'Задача 7', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 7, name: 'Задача 8', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 8, name: 'Задача 9', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 9, name: 'Задача 10', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 10, name: 'Задача 11', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 11, name: 'Задача 12', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []}
 ];
 
 const taskList = reactive([]);
+
+// сегодняшняя дата
+function getTodayDate() {
+    const date = new Date();
+
+    const year = date.getFullYear();
+
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+
+    if (month < 10) {
+        month = '0' + month;
+    };
+
+    if (day < 10) {
+        day = '0' + day;
+    };
+
+    return `${year}-${month}-${day}`;
+};
 
 // сохранение задач в localStorage
 function saveTasksToStorage() {
@@ -41,6 +61,8 @@ function loadTasksFromStorage() {
                 id: task.id,
                 name: task.name,
                 description: task.description,
+                subtasks: task.subtasks,
+                date: task.date,
                 priority: task.priority,
                 isDone: false,
                 isArchive: false,
@@ -56,20 +78,34 @@ loadTasksFromStorage();
 const tasks = computed(() => taskList);
 
 // добавление задачи
-function addTask(newName, newDescription, newPriority) {
+function addTask(newTask) {
     let maxId = -1;
+
     for (let i = 0; i < taskList.length; i++) {
         if (taskList[i].id > maxId) {
             maxId = taskList[i].id;
         };
     };
 
+    const subtasksList = [];
+
+    for (let i = 0; i < newTask.subtasks.length; i++) {
+        const currentSubtask = newTask.subtasks[i].trim();
+
+        if (currentSubtask !== '') {
+            subtasksList.push(currentSubtask);
+        };
+    };
+
     const newTaskId = maxId + 1;
+
     taskList.push({
         id: newTaskId,
-        name: newName,
-        description: newDescription,
-        priority: newPriority,
+        name: newTask.name.trim(),
+        description: newTask.description.trim(),
+        subtasks: subtasksList,
+        date: newTask.date,
+        priority: newTask.priority,
         isDone: false,
         isArchive: false,
         isExpired: false
@@ -86,6 +122,7 @@ function findTask(taskId) {
 // удаление задачи
 function deleteTask(taskId) {
     const deletedTask = taskList.indexOf(findTask(taskId));
+
     if (deletedTask !== -1) {
         taskList.splice(deletedTask, 1);
         saveTasksToStorage();
@@ -93,23 +130,57 @@ function deleteTask(taskId) {
 };
 
 // изменение задачи
-function editTask(taskId, editName, editDescription, editPriority) {
+function editTask(taskId, editTaskData) {
     const editingTask = taskList.find((task) => task.id === taskId);
+
     if (!editingTask) {
-        return
+        return;
     };
 
-    editingTask.name = editName;
-    editingTask.description = editDescription;
-    editingTask.priority = editPriority;
+    const subtasksList = [];
+
+    for (let i = 0; i < editTaskData.subtasks.length; i++) {
+        const currentSubtask = editTaskData.subtasks[i].trim();
+
+        if (currentSubtask !== '') {
+            subtasksList.push(currentSubtask);
+        };
+    };
+
+    editingTask.name = editTaskData.name.trim();
+    editingTask.description = editTaskData.description.trim();
+    editingTask.subtasks = subtasksList;
+    editingTask.date = editTaskData.date;
+    editingTask.priority = editTaskData.priority;
 
     saveTasksToStorage();
 };
 
+// очистка подзадач
+function getCleanSubtasks(subtasks) {
+    const result = subtasks.filter((subtask) => {
+        return subtask.trim() !== '';
+    });
+
+    return result;
+};
+
+// подготовка данных задачи
+function prepareTaskData(form) {
+    return {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        subtasks: getCleanSubtasks(form.subtasks),
+        date: form.date,
+        priority: form.priority
+    };
+};
+
+
 // экспорт всего и вся
 export default function useTask() {
     return {
-        tasks, 
-        addTask, findTask, deleteTask, editTask, saveTasksToStorage, loadTasksFromStorage
+        tasks,
+        addTask, findTask, deleteTask, editTask, getTodayDate, saveTasksToStorage, loadTasksFromStorage, getCleanSubtasks, prepareTaskData
     };
 };
