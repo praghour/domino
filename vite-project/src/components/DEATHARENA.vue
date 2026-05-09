@@ -142,7 +142,7 @@ function fight() {
       stopFight();
     }
     
-  }, 3000);
+  }, 1000);
 }
 
 function stopFight() {
@@ -198,11 +198,15 @@ function prevSlideArena() {
 }
 
 function selectArenaCard(fish) {
-  if (!isFighting.value) {
-    addFishtoParty(fish.id);
-    updateSelectedArenaIds();
-    updateTeamHP();
+  const fishId = fish.id;
+  
+  if (isFishInParty(fishId)) {
+    removeFishFromParty(fishId);
+  } else {
+    addFishtoParty(fishId);
   }
+  
+  updateSelectedArenaIds();
 }
 
 function removeFromParty(fishId) {

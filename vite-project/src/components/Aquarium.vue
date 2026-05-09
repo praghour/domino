@@ -80,7 +80,14 @@ function prevSlideArena() {
 }
 
 function selectArenaCard(fish) {
-  addFishtoParty(fish.id);
+  const fishId = fish.id;
+  
+  if (isFishInParty(fishId)) {
+    removeFishFromParty(fishId);
+  } else {
+    addFishtoParty(fishId);
+  }
+  
   updateSelectedArenaIds();
 }
 
