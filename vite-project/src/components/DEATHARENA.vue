@@ -4,17 +4,34 @@ import { useRouter } from 'vue-router';
 import useFishman from '../composables/Arena';
 import useAquarium from '../composables/useAquarium.js';
 import useGacha from '../composables/useGacha.js';
+import useMoney from '../composables/useMoney.js';
 
 const router = useRouter();
 const { party, bossList, addFishtoParty, removeFishFromParty, fishList, addOrUpdateFish } = useFishman();
 const { gacha, win, lastFish } = useGacha();
 const aquarium = useAquarium();
-const maxTeamHP = computed(() => calculateTeamHP()); // <-- ДОБАВИТЬ ЭТО
+const maxTeamHP = computed(() => calculateTeamHP());
 // Обновляем доступных рыб в аквариуме при изменении win
 watch(win, (newWin) => {
   const winIds = newWin.map(fish => fish.id);
   aquarium.updateAvailableFish(winIds);
 }, { deep: true, immediate: true });
+
+
+
+// БАБКИ
+const { findCurrency } = useMoney();
+
+const userMoney = computed(() => {
+  const money = findCurrency('money');
+  return money ? money.count : 0;
+});
+
+const userCrystals = computed(() => {
+  const crystal = findCurrency('crystal');
+  return crystal ? crystal.count : 0;
+});
+// БАБКИ
 
 // === БОЕВАЯ СИСТЕМА ===
 const bossHealth = ref(100);
@@ -29,7 +46,7 @@ let fightInterval = null;
 const abilitydamage = computed(() => {
   let totalDamage = 0;
   for (const fishy of party.value) {
-    if (fishy.abilitytype === 'damage') {  // тип способности у каждой рыбки
+    if (fishy.abilitytype === 'damage') {
       totalDamage += Number(fishy.abilityvalue) || 0;
     }
   }
@@ -39,7 +56,7 @@ const abilitydamage = computed(() => {
 const abilityheal = computed(() => {
   let totalHeal = 0;
   for (const fishy of party.value) {
-    if (fishy.abilitytype === 'heal') {  // тип способности у каждой рыбки
+    if (fishy.abilitytype === 'heal') {
       totalHeal += Number(fishy.abilityvalue) || 0;
     }
   }
@@ -199,7 +216,11 @@ function prevSlideArena() {
 
 function selectArenaCard(fish) {
   if (!isFighting.value) {
-    addFishtoParty(fish.id);
+    if (isFishInParty(fish.id)) {
+      removeFishFromParty(fish.id);
+    } else {
+      addFishtoParty(fish.id);
+    }
     updateSelectedArenaIds();
     updateTeamHP();
   }
@@ -284,16 +305,16 @@ function goToAquarium() {
 <div class="arena-page">
     <div class="sidebar">
         <!-- БАЛАНС -->
-        <div class="your-balance">
+        <div class="your-balanceArena">
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
-                <div class="balance-values">
-                    <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
-                    <p class="balance-item">10<img src="/Aquarium/crystals.png" alt=""></p>
+                <div class="balance-arena">
+                    <div class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></div>
+                    <div class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></div>
                 </div>
             </div>
-            <button class="chest-btn" @click="showGachaModal = true">Сундуки</button>
         </div>
+
 
         <!-- НАСТРОЙКИ -->
         <div class="game-settings">
@@ -308,7 +329,7 @@ function goToAquarium() {
                 <div class="slides-arena">
                     <div class="slide-arena">
                         <div 
-                            v-for="(fish) in visibleArenaSlides" :key="fish.id" class="arena-item"> 
+                            v-for="fish in visibleArenaSlides" :key="fish.id" class="arena-item"> 
                             <button class="arena-fish-btn"
                                 :class="{ 'active-arena': isFishInParty(fish.id) }"
                                 @click="selectArenaCard(fish)">
@@ -316,6 +337,7 @@ function goToAquarium() {
                             </button>
                             <div class="arena-fish-info">
                                 <div class="fish-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
+                                <div class="party-stats">HP{{ fish.health }} DMG{{ fish.damage }}</div>
                             </div>
                         </div>
                     </div>
@@ -323,22 +345,6 @@ function goToAquarium() {
                 <button class="control-btn-arena-down" @click="nextSlideArena()">
                     <img src="/Aquarium/down.png" alt="">
                 </button>
-            </div>
-
-            <!-- ТЕКУЩИЙ ОТРЯД -->
-            <p class="gs-p2">Текущий отряд</p>
-            <div class="current-party">
-                <div v-for="fish in party" :key="fish.id" class="party-item">
-                    <img :src="fish.img" :alt="fish.name">
-                    <div class="party-info">
-                        <div class="party-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
-                        <div class="party-stats">HP{{ fish.health }} DMG{{ fish.damage }}</div>
-                    </div>
-                    <button class="remove-party-btn" @click="removeFromParty(fish.id)" :disabled="isFighting">✖</button>
-                </div>
-                <div v-if="party.length === 0" class="empty-party">
-                    Нет рыбок в отряде
-                </div>
             </div>
         </div>  
 
@@ -497,7 +503,7 @@ function goToAquarium() {
   gap: 20px;
 }
 
-.your-balance,
+.your-balanceArena,
 .game-settings,
 .game-mode {
   background-color: white;
@@ -505,14 +511,15 @@ function goToAquarium() {
   border: 1px solid #E5EAF1;
 }
 
-/* БАЛАНС */
-.your-balance {
+/* БАЛАНС АРЕНА */
+.your-balanceArena {
   width: 348px;
-  height: 133px;
+  height: 97px;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   position: relative;
+
 }
 
 .balance-info {
@@ -530,43 +537,31 @@ function goToAquarium() {
   margin: 0;
 }
 
-.balance-values {
+.balance-arena {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 50px;
+  width: 100%;
+  margin-left: 45px;
 }
 
 .balance-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 20px;
   color: #1A1A1A;
   margin: 0;
 }
 
 .balance-item img {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
-
-.chest-btn {
-  width: 104px;
-  height: 43px;
-  border-radius: 10px;
-  padding: 10px 20px;
-  background-color: #2D78F5;
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+/* БАЛАНС АРЕНА */
 
 /* НАСТРОЙКИ */
 .game-settings {
@@ -644,18 +639,16 @@ function goToAquarium() {
 .arena-fish-btn {
   width: 72px;
   height: 64px;
-  background: #EFF3F8;
+  background: #ffffff;
   cursor: pointer;
   padding: 0;
   border-radius: 10px;
   border: 2px solid #E5EAF1;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .arena-fish-btn.active-arena {
   border: 2px solid #2D78F5;
-  background: #DBEAFD;
 }
 
 .arena-fish-btn img {
@@ -678,83 +671,9 @@ function goToAquarium() {
   color: #1A1A1A;
 }
 
-.fish-ability {
-  font-weight: 400;
-  font-size: 12px;
-  color: #67758A;
-}
-
-/* ТЕКУЩИЙ ОТРЯД */
-.current-party {
-  width: 308px;
-  max-height: 200px;
-  overflow-y: auto;
-  background: #EFF3F8;
-  border-radius: 10px;
-  padding: 8px;
-}
-
-.party-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #E5EAF1;
-}
-
-.party-item img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.party-info {
-  flex: 1;
-}
-
-.party-name {
-  font-weight: 500;
-  font-size: 14px;
-  color: #1A1A1A;
-}
-
 .party-stats {
   font-size: 11px;
   color: #67758A;
-}
-
-.remove-party-btn {
-  width: 24px;
-  height: 24px;
-  background: #FF4D4F;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.remove-party-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.remove-party-btn:hover:not(:disabled) {
-  background: #ff7875;
-}
-
-.empty-party {
-  text-align: center;
-  color: #67758A;
-  padding: 20px;
-  font-size: 14px;
 }
 
 /* РЕЖИМ ИГРЫ */

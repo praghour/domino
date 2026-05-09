@@ -4,10 +4,36 @@ import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import useAquarium from "../composables/useAquarium.js";
 import useGacha from "../composables/useGacha.js";
 import useFishman from "../composables/Arena.js";
+import useMoney from '../composables/useMoney.js';
+import useNotice from '../composables/useNotice.js';
+
 const router = useRouter()
 const { gacha, win, lastFish } = useGacha();
 const { fishList, addFishtoParty, removeFishFromParty, party, addOrUpdateFish } = useFishman();
 const aquarium = useAquarium();
+
+// балванка для тестов 
+// Функция добавления тестовой валюты
+const addTestCurrency = () => {
+  addCurrency('money', 10);
+  addCurrency('crystal', 10);
+};
+// балванка для тестов 
+
+// БАБКИ
+const { findCurrency, spendCurrency, currency, addCurrency } = useMoney();
+const { showNotice, isNoticeVisible, notice } = useNotice();
+
+const userMoney = computed(() => {
+  const money = findCurrency('money');
+  return money ? money.count : 0;
+});
+
+const userCrystals = computed(() => {
+  const crystal = findCurrency('crystal');
+  return crystal ? crystal.count : 0;
+});
+// БАБКИ
 
 // Обновляем доступных рыб в аквариуме при изменении win
 watch(win, (newWin) => {
@@ -128,11 +154,28 @@ onMounted(() => {
   
   updateSelectedArenaIds();
 });
+
 onUnmounted(() => {
   aquarium.stopAnimation();
 });
 
 const onGachaClick = () => {
+  const money = findCurrency('money');
+  
+  // Проверяем достаточно ли монет
+  if (!money || money.count < 10) {
+    showNotice('Ошибка', 'Недостаточно монет! Нужно 10 монет для открытия сундука.');
+    return;
+  }
+  
+  // Списываем 10 монет
+  const success = spendCurrency('money', 10);
+  
+  if (!success) {
+    showNotice('Ошибка', 'Не удалось списать монеты. Попробуйте снова.');
+    return;
+  }
+  
   gacha(); // получаем новую рыбку (lastFish)
   
   // ОБНОВЛЯЕМ КОЛЛЕКЦИЮ
@@ -159,8 +202,11 @@ function closeWinModal() {
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
                 <div class="balance-values">
-                    <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
-                    <p class="balance-item">10<img src="/Aquarium/crystals.png" alt=""></p>
+                    <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
+                    <p class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></p>
+                                <!-- балванка для тестов -->
+            <button @click="addTestCurrency">+10</button>
+            <!-- балванка для тестов -->
                 </div>
             </div>
             <button class="chest-btn" @click="showGachaModal = true">Сундуки</button>
@@ -213,56 +259,6 @@ function closeWinModal() {
                     <img src="/Aquarium/right.png" alt="">
                 </button>
             </div>
-
-            <!-- ВЕРТИКАЛЬНЫЙ СЛАЙДЕР (Рыбки НА АРЕНУ) -->
-            <p class="gs-p2">Рыбки на арену</p>  
-            <div class="slider-arena">   
-                <button class="control-btn-arena-up" @click="prevSlideArena()">
-                    <img src="/Aquarium/up.png" alt="">
-                </button>
-                <div class="slides-arena">
-                    <div class="slide-arena">
-                        <div 
-                            v-for="fish in visibleArenaSlides" :key="fish.id" class="arena-item"> 
-                            <button class="arena-fish-btn"
-                                :class="{ 'active-arena': isFishInParty(fish.id) }"
-                                @click="selectArenaCard(fish)">
-                                <img :src="fish.src" :alt="fish.alt" />
-                            </button>
-                            <div class="arena-fish-info">
-                                <div class="fish-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="control-btn-arena-down" @click="nextSlideArena()">
-                    <img src="/Aquarium/down.png" alt="">
-                </button>
-            </div>
-
-            <!-- КНОПКА ПОКАЗАТЬ ОТРЯД -->
-            <button class="show-party-btn" @click="togglePartyList">
-                {{ showPartyList ? 'Скрыть отряд' : 'Показать отряд' }} ({{ party.length }})
-            </button>
-
-            <!-- ТЕКУЩИЙ ОТРЯД (выезжающая панель) -->
-            <div v-if="showPartyList" class="current-party">
-                <div class="party-header">
-                    <span>Текущий отряд</span>
-                    <button class="close-party" @click="showPartyList = false">X</button>
-                </div>
-                <div v-for="fish in party" :key="fish.id" class="party-item">
-                    <img :src="fish.img"  :alt="fish.name">
-                    <div class="party-info">
-                        <div class="party-name">{{ fish.name }} lvl {{ fish.lvl }}</div>
-                        <div class="party-stats">HP{{ fish.health }} DMG{{ fish.damage }}</div>
-                    </div>
-                    <button class="remove-party-btn" @click="removeFromParty(fish.id)">X</button>
-                </div>
-                <div v-if="party.length === 0" class="empty-party">
-                    Нет рыбок в отряде
-                </div>
-            </div>
         </div>  
 
         <!-- РЕЖИМ ИГРЫ -->
@@ -287,6 +283,7 @@ function closeWinModal() {
             </div>
         </div>
     </div>
+    
     <!-- ГАЧА МОДАЛКА -->
     <div v-if="showGachaModal" class="overlay" @click="showGachaModal = false"></div>
     <div class="gacha" v-if="showGachaModal" @click.self="showGachaModal = false">
@@ -296,7 +293,7 @@ function closeWinModal() {
         </div>
         <div class="balance-gacha">
             <p>Ваш баланс</p>
-            <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+            <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
         </div>
         <div class="select-chest">
             <p class="ppp">Выберите сундук</p>
@@ -304,17 +301,17 @@ function closeWinModal() {
         <div class="chest-cards">
             <div class="chest-card">
                 <img src="/gacha/chest.png" alt="">
-                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" height="20px" alt=""></p>
+                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
                 <button class="open-btn" @click="onGachaClick">Открыть</button>
             </div>
             <div class="chest-card">
                 <img src="/gacha/chest.png" alt="">
-                <p class="balance-item" >10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" height="20px" alt=""></p>
+                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
                 <button class="open-btn" @click="onGachaClick">Открыть</button>
             </div>
             <div class="chest-card">
                 <img src="/gacha/chest.png" alt="">
-                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" height="20px" alt=""></p>
+                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
                 <button class="open-btn" @click="onGachaClick">Открыть</button>
             </div>
         </div>
@@ -333,6 +330,16 @@ function closeWinModal() {
             <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
         </div>
     </div>
+
+    <!-- УВЕДОМЛЕНИЕ -->
+    <teleport to="body">
+        <div v-if="isNoticeVisible" class="notice">
+            <div class="notice-content">
+                <h4>{{ notice.title }}</h4>
+                <p>{{ notice.description }}</p>
+            </div>
+        </div>
+    </teleport>
 </div>
 </template>
 
@@ -434,6 +441,8 @@ body {
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
+  border: none;
+  outline: none;
 }
 
 /* НАСТРОЙКИ */
@@ -480,6 +489,10 @@ body {
   height: 24px;
   display: block;
   cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .control-btn img {
@@ -525,7 +538,7 @@ body {
 .bgfish-btn {
   width: 72px;
   height: 64px;
-  background: #EFF3F8;
+  background: #ffffff;
   cursor: pointer;
   padding: 0;
   border-radius: 10px;
@@ -535,7 +548,6 @@ body {
 
 .bgfish-btn.active-fish {
   border: 2px solid #2D78F5;
-  background: #DBEAFD;
 }
 
 .bgfish-btn img {
@@ -544,205 +556,6 @@ body {
   object-fit: contain;
   border-radius: 8px;
   display: block;
-}
-
-/* ВЕРТИКАЛЬНЫЙ СЛАЙДЕР */
-.slider-arena {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 11px;
-  width: 308px;
-  height: auto;
-}
-
-.control-btn-arena-up,
-.control-btn-arena-down {
-  width: 24px;
-  height: 24px;
-  display: block;
-  cursor: pointer;
-}
-
-.control-btn-arena-up img,
-.control-btn-arena-down img {
-  width: 24px;
-  height: 24px;
-}
-
-.slides-arena {
-  width: 100%;
-  overflow: hidden;
-}
-
-.slide-arena {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.arena-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.arena-fish-btn {
-  width: 72px;
-  height: 64px;
-  background: #EFF3F8;
-  cursor: pointer;
-  padding: 0;
-  border-radius: 10px;
-  border: 2px solid #E5EAF1;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.arena-fish-btn.active-arena {
-  border: 2px solid #2D78F5;
-  background: #DBEAFD;
-}
-
-.arena-fish-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-  display: block;
-}
-
-.arena-fish-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.fish-name {
-  font-weight: 500;
-  font-size: 14px;
-  color: #1A1A1A;
-}
-
-.fish-ability {
-  font-weight: 400;
-  font-size: 12px;
-  color: #67758A;
-}
-
-/* КНОПКА ПОКАЗАТЬ ОТРЯД */
-.show-party-btn {
-  width: 100%;
-  height: 40px;
-  background: #2D78F5;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-.show-party-btn:hover {
-  background: #1a5bc4;
-}
-
-/* ТЕКУЩИЙ ОТРЯД */
-.current-party {
-  margin-top: 10px;
-  width: 308px;
-  max-height: 250px;
-  overflow-y: auto;
-  background: #EFF3F8;
-  border-radius: 10px;
-  padding: 8px;
-  border: 1px solid #E5EAF1;
-}
-
-.party-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 8px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #1A1A1A;
-  border-bottom: 1px solid #E5EAF1;
-  margin-bottom: 8px;
-}
-
-.close-party {
-  width: 20px;
-  height: 20px;
-  background: #FF4D4F;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.party-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #E5EAF1;
-}
-
-.party-item img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.party-info {
-  flex: 1;
-}
-
-.party-name {
-  font-weight: 500;
-  font-size: 14px;
-  color: #1A1A1A;
-}
-
-.party-stats {
-  font-size: 11px;
-  color: #67758A;
-}
-
-.remove-party-btn {
-  width: 24px;
-  height: 24px;
-  background: #FF4D4F;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.remove-party-btn:hover {
-  background: #ff7875;
-}
-
-.empty-party {
-  text-align: center;
-  color: #67758A;
-  padding: 20px;
-  font-size: 14px;
 }
 
 /* РЕЖИМ ИГРЫ */
@@ -803,24 +616,6 @@ body {
   justify-content: center;
   padding: 15px;
   border: 1px solid #E5EAF1;
-}
-
-/* АРЕНА */
-.arena-block {
-  width: 975px;
-  height: 550px;
-  background-color: #ffffff;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
-  border: 1px solid #E5EAF1;
-}
-
-.arena-placeholder {
-  text-align: center;
-  color: #67758A;
 }
 
 /* ОВЕРЛЕЙ ДЛЯ МОДАЛОК */
@@ -978,4 +773,6 @@ body {
   background-color: #2D78F5;
   color: #FEFEFE;
 }
+
+
 </style>
