@@ -1,17 +1,13 @@
 <script setup>
 import { RouterView } from 'vue-router';
-import task from './components/task.vue';
 import useNotice from './composables/useNotice';
 
-const { notice, isNoticeVisible, showNotice } = useNotice();
-
-showNotice('Тестовое уведомление', 'текст уведомления длииииииииииииинный');
+const { notice, isNoticeVisible } = useNotice();
 </script>
 
 <template>
     <div class="app">
         <RouterView />
-
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
             <div class="notice_icon">⚠</div>
@@ -44,6 +40,15 @@ showNotice('Тестовое уведомление', 'текст уведомл
     color: #6b778c;
     font-size: 32px;
     font-weight: 700;
+}
+.navigation button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
 }
 
 .notice_content {

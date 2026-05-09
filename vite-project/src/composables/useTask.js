@@ -3,8 +3,17 @@ import { computed, reactive } from 'vue';
 // default список задач для проверок и тестов
 const defaultTaskList = [
     {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
-    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Низкий', date: '', subtasks: []},
-    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Низкий', date: '', subtasks: []}
+    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 6, name: 'Задача 7', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 7, name: 'Задача 8', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 8, name: 'Задача 9', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []},
+    {id: 9, name: 'Задача 10', description: 'Сделать раз', priority: 'Низкий', date: '', subtasks: []},
+    {id: 10, name: 'Задача 11', description: 'Сделать два', priority: 'Средний', date: '', subtasks: []},
+    {id: 11, name: 'Задача 12', description: 'Сделать три', priority: 'Высокий', date: '', subtasks: []}
 ];
 
 const taskList = reactive([]);
@@ -60,7 +69,6 @@ function loadTasksFromStorage() {
                 isExpired: false
             });
         });
-
         saveTasksToStorage();
     };
 };

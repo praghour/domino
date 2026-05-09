@@ -10,7 +10,7 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
         <div class="timer_check">
             <div class="timer_header">
                 <h2>Фокусировка</h2>
-                <p>Сосредоточьтесь на работе без отвлечений</p>
+                <p>Сосредоточьтесь на работе без отвлекающих факторов</p>
             </div>
             <div class="timer" :style="timerStyle">
                 <div class="timer_inner">{{ timeText }}</div>
