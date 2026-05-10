@@ -601,12 +601,7 @@ function goToAquarium() {
     <div class="arena-container">
         <div style="position: relative; width: 935px; height: 550px;">
             <img :src="currentFon.src" alt="фон арены" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
-            
-            <!-- СТАТИСТИКА НА ЭКРАНЕ -->
             <div class="stats-panel">
-                <div class="stat-item">🏆 Побед: {{ totalWins }}</div>
-                <div class="stat-item">💀 Поражений: {{ totalLosses }}</div>
-                <!-- КНОПКА ВЫХОДА ИЗ БОЯ -->
                 <button v-if="isFighting" class="exit-battle-btn" @click="exitBattle">🚪 Выйти</button>
             </div>
             
