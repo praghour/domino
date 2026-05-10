@@ -3,12 +3,21 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import useNotice from '../composables/useNotice';
 import useTask from '../composables/useTask';
+ import useMoney from '../composables/useMoney.js';
+import CreateTask from './createTask.vue';
+import EditTask from './editTask.vue';
+
+const isCreateModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const selectedTask = ref(null);
 
 const router = useRouter();
 
 const { showNotice } = useNotice();
+const { tasks, deleteTask, editTask, saveTasksToStorage } = useTask();
 const { tasks, deleteTask, saveTasksToStorage } = useTask();
-
+const { findCurrency } = useMoney();
+  
 const activeFilter = ref('all');
 
 const filters = [
@@ -87,15 +96,39 @@ function remove(id) {
     showNotice('Задача удалена', 'Задача убрана из списка');
 };
 
-// переход к форме добавления
+// открытие/закрытие модалок
 function openTaskForm() {
-    router.push({name: 'taskForm'});
+    isCreateModalOpen.value = true;
 };
 
-// переход к форме изменения
-function openEditTask(taskId) {
-    router.push({name: 'taskEdit', params: {id: taskId}});
+function openEditTask(task) {
+    selectedTask.value = task;
+    isEditModalOpen.value = true;
 };
+
+function closeCreateModal() {
+    isCreateModalOpen.value = false;
+};
+
+// сохранение изменённой задачи
+function saveEditedTask(editedTask) {
+    editTask(selectedTask.value.id, editedTask);
+    isEditModalOpen.value = false;
+    selectedTask.value = null;
+    showNotice('Задача изменена', 'Изменения сохранены');
+};
+  
+ //бабосики 
+const userMoney = computed(() => {
+  const money = findCurrency('money');
+  return money ? money.count : 0;
+});
+
+const userCrystals = computed(() => {
+  const crystal = findCurrency('crystal');
+  return crystal ? crystal.count : 0;
+});
+
 
 // переход к аквариуму
 function openAquarium() {
@@ -106,6 +139,10 @@ function openAquarium() {
 function openTimer() {
     router.push({name: 'timer'});
 };
+
+function openAchievements() {
+    router.push({name: 'achievements'});
+}
 </script>
 
 <template>
@@ -135,7 +172,7 @@ function openTimer() {
                     <span v-else>{{ task.priority }}</span>
                 </span>
 
-                <button class="icon_button" @click="openEditTask(task.id)">
+                <button class="icon_button" @click="openEditTask(task)">
                     <img src="/icons/edit.svg" alt="Изменить">
                 </button>
 
@@ -157,8 +194,8 @@ function openTimer() {
                     <button class="game_button" @click="openAquarium">Перейти в игру</button>
                 </div>
                 <div class="game_stats">
-                    <span>10 <img src="/icons/coin.svg" alt="Монеты"></span>
-                    <span>10 <img src="/icons/crystal.svg" alt="Кристаллы"></span>
+                    <span>{{ userMoney }}<img src="/icons/coin.svg" alt="Монеты"></span>
+                    <span>{{ userCrystals }}<img src="/icons/crystal.svg" alt="Кристаллы"></span>
                 </div>
             </div>
 
@@ -174,8 +211,6 @@ function openTimer() {
                         </small>
                     </div>
                 </div>
-
-                <button class="show_all_button">Показать все</button>
             </div>
 
             <div class="side_block">
@@ -186,7 +221,7 @@ function openTimer() {
                         <span>Фокусировка</span>
                     </button>
 
-                    <button class="quick_button">
+                    <button class="quick_button" @click="openAchievements">
                         <img src="/icons/award.svg" alt="">
                         <span>Достижения</span>
                     </button>
@@ -194,6 +229,8 @@ function openTimer() {
             </div>
         </aside>
     </main>
+    <CreateTask v-model="isCreateModalOpen" />
+    <EditTask v-model="isEditModalOpen" v-bind:task="selectedTask" v-on:save="saveEditedTask"/>
 </template>
 
 <style scoped>
@@ -397,6 +434,11 @@ button {
   justify-content: center;
   gap: 35px;
   margin-top: 12px;
+}
+
+.game_stats span {
+    font-family: 'FRM3216x16', 'FRM325x8', monospace;
+    font-size: 16px;
 }
 
 .game_stats span {

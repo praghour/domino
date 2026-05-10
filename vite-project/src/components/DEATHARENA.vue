@@ -219,9 +219,9 @@ function restartFight() {
   startFight();
 }
 
-// === ФОН ===
+// Фиксированный фон арены
 const currentFon = computed(() => {
-  return aquarium.slidesfon.value.find(f => f.id === aquarium.selectedFonId.value);
+  return { src: '/Aquarium/fonarena.png' };
 });
 
 // === ВЕРТИКАЛЬНЫЙ СЛАЙДЕР (выбор в party) - только когда не в бою ===
@@ -339,8 +339,8 @@ function goToAquarium() {
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
                 <div class="balance-arena">
-                    <div class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></div>
-                    <div class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></div>
+                    <div class="balance-item"><p>{{ userMoney }}</p><img src="/Aquarium/money.png" alt=""></div>
+                    <div class="balance-item"><p>{{ userCrystals }}</p><img src="/Aquarium/crystals.png" alt=""></div>
                 </div>
             </div>
         </div>
@@ -394,12 +394,25 @@ function goToAquarium() {
             <!-- ФОН арены -->
             <img :src="currentFon.src" alt="фон арены" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
             
+            <div class="boss-image">
+                <div v-for="boss in bossList" :key="boss.id" class="boss-card">
+                    <img :src="boss.img" width="120px" :alt="boss.name">
+                </div>
+            </div>   
+            
+            <div class="team-fish-left">
+                <div v-for="(fish, index) in party" :key="fish.id" class="arena-fish-card">
+                    <img :src="fish.img" width="45px" :alt="fish.name">
+                </div>
+            </div>           
             <!-- Команда игрока (слева) -->
             <div class="arena-team">
-                <h3>Ваша команда</h3>
                 <div class="team-stats">
-                    <span>HP: <strong>{{ teamHP }} / {{ originalTeamHP }}</strong></span>
-                    <span>DMG: {{ fishDamage }}</span>
+                    <p>Ваша команда</p>
+                    <div class="stats-row">
+                        <span>HP: <strong>{{ teamHP }} / {{ originalTeamHP }}</strong></span>
+                        <span>DMG: {{ fishDamage }}</span>
+                    </div>
                 </div>
                 <!-- Полоска HP команды -->
                 <div class="health-bar-container">
@@ -411,19 +424,16 @@ function goToAquarium() {
                         }"
                     ></div>
                 </div>
-                <div class="team-members">
-                    <div v-for="fish in party" :key="fish.id" class="arena-fish-card">
-                        <img :src="fish.img" width="35px" :alt="fish.name">
-                        <span>{{ fish.name }}</span>
-                    </div>
-                </div>
+
             </div>
             
             <!-- Босс (справа) -->
             <div class="arena-boss">
-                <h3>БОСС</h3>
-                <h2> УРОВЕНЬ {{ bosslvl }} </h2>
-                <div class="boss-stats">
+                <div class="boss-header">
+                    <h3>БОСС</h3>
+                    <span>УРОВЕНЬ {{ bosslvl }}</span>
+                </div>
+                <div class="boss-stats-row">
                     <span>HP: <strong>{{ currentbosshp }} / {{ maxBossHealth }}</strong></span>
                     <span>DMG: {{ bossDamage }}</span>
                 </div>
@@ -437,21 +447,25 @@ function goToAquarium() {
                         }"
                     ></div>
                 </div>
+<<<<<<< HEAD
                 <div class="boss-card">
                 <img :src="currentBoss.img" width="80px" :alt="currentBoss.name">
                 <p>{{ currentBoss.name }}</p>
                   </div>
+=======
+>>>>>>> 1cfe63db6d4faaac7a46c6526e5bc3ad7cb78046
             </div>
 
             <!-- Кнопка начала боя -->
-            <div v-if="!isFighting && party.length > 0" class="start-battle-btn">
-                <button @click="startFight">В БОЙ</button>
+            <div v-if="!isFighting && party.length > 0" class="start-battle">
+                <p>Начать игру?</p>
+                <button class="start-battle-btn" @click="startFight">В БОЙ!</button>
             </div>
 
             <!-- Сообщение о поражении -->
             <div v-if="!isFighting && teamHP <= 0 && party.length > 0" class="game-over">
-                <h2>Поражение!</h2>
-                <button @click="restartFight">Начать заново</button>
+                <p>Поражение!</p>
+                <button class="game-over-btn" @click="restartFight">Начать заново</button>
             </div>
 
             <!-- Затемнение если нет рыбок -->
@@ -586,6 +600,10 @@ function goToAquarium() {
   margin: 0;
 }
 
+.balance-arena p {
+    font-family: 'FRM3216x16', 'FRM325x8', monospace;
+}
+
 .balance-item img {
   width: 28px;
   height: 28px;
@@ -599,6 +617,83 @@ function goToAquarium() {
   height: auto;
   min-height: 286px;
   padding: 20px;
+}
+
+
+/* Рыбы команды слева, напротив босса */
+.team-fish-left {
+  position: absolute;
+  left: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+/* Первая рыба */
+.arena-fish-card:nth-child(1) {
+  position: relative;
+  top: 80px;
+}
+
+/* Вторая рыба */
+.arena-fish-card:nth-child(2) {
+  position: relative;
+  top: 40px;
+  left: 120px;
+}
+
+/* Третья рыба */
+.arena-fish-card:nth-child(3) {
+  position: relative;
+  top: 10px;
+}
+
+/* Четвертая рыба */
+.arena-fish-card:nth-child(4) {
+  position: relative;
+  top: -10px;
+  left: 120px;
+}
+
+/* Анимация движения рыб */
+.arena-fish-card {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Разные задержки для каждой рыбы */
+.arena-fish-card:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.arena-fish-card:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.arena-fish-card:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.arena-fish-card:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.arena-fish-card img {
+
+  width: 120px;
+  height: 101px;
+  object-fit: cover;
 }
 
 .gs-p {
@@ -770,9 +865,7 @@ function goToAquarium() {
   position: absolute;
   left: 20px;
   top: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 15px;
+  padding: 1px;
   border-radius: 12px;
   color: white;
   min-width: 220px;
@@ -780,17 +873,30 @@ function goToAquarium() {
 
 .team-stats {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2px;
+}
+
+.team-stats p {
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
+}
+
+.stats-row {
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
   font-size: 14px;
+  display: flex;
+  gap: 20px;
 }
 
 /* Стили для полосок HP */
 .health-bar-container {
-  width: 100%;
-  height: 10px;
+  width: 286px;
+  height: 20px;
   background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 5px;
+  border-radius: 100px;
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -805,111 +911,169 @@ function goToAquarium() {
   margin-bottom: 15px;
 }
 
-.team-members {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.arena-fish-card {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 5px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-}
-
+/* Босс - стили как у команды игрока, но с выравниванием вправо */
 .arena-boss {
   position: absolute;
   right: 20px;
   top: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 15px;
+  padding: 1px;
   border-radius: 12px;
   color: white;
-  text-align: center;
-  min-width: 170px;
+  min-width: 220px;
+  text-align: right;
 }
 
-.boss-stats {
+.boss-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.boss-header h3 {
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
+  margin: 0;
+}
+
+.boss-header span {
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
   font-size: 14px;
+}
+
+.boss-stats-row {
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
+  font-size: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.boss-image {
+  position: absolute;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
 }
 
 .boss-card {
   text-align: center;
-  margin-top: 10px;
+  margin: 0;
 }
 
 .boss-card img {
-  border-radius: 50%;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+  width: 335px;
+  height: 265px;
+  object-fit: contain;
+}
+
+/* Анимация для босса */
+.boss-card {
+  text-align: center;
+  margin: 0;
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.start-battle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 328px;
+  height: 132px;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.start-battle p {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #1A1A1A;
 }
 
 .start-battle-btn {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.start-battle-btn button {
-  padding: 12px 30px;
-  font-size: 20px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  width: 288px;
+  height: 43px;
+  background-color: #2D78F5;
   border: none;
-  border-radius: 50px;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  transition: background-color 0.2s;
 }
 
-.start-battle-btn button:hover {
-  transform: scale(1.05);
+.start-battle-btn:hover {
+  background-color: #1a5bc4;
 }
 
+/* Проигрыш */
 .game-over {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  z-index: 100;
+  width: 328px;
+  height: 132px;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
 }
 
-.game-over button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-top: 10px;
-  background: #4CAF50;
-  color: white;
+.game-over p {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #1A1A1A;
+}
+
+.game-over-btn {
+  width: 288px;
+  height: 43px;
+  background-color: #EFF3F8;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
+  color: #66748A;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.no-fish-message {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
+.game-over-btn:hover {
+  background-color: #2D78F5;
   color: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  z-index: 100;
 }
 
 /* ОВЕРЛЕЙ ДЛЯ МОДАЛОК */
