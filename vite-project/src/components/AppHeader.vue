@@ -1,6 +1,6 @@
 <template>
     <header class="header">
-        <RouterLink to="/" class="logo">
+        <RouterLink :to="{ name: 'main' }" class="logo">
             <div class="logo_icon"><img src="/icons/logo.svg" alt="ToDo logo"></div>
 
             <div class="logo_text">

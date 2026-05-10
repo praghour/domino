@@ -1,7 +1,7 @@
 <template>
     <footer class="footer">
         <div class="footer_inner">
-            <RouterLink to="/" class="footer_logo">
+            <RouterLink :to="{ name: 'main' }" class="footer_logo">
                 <div class="logo_icon"><img src="/icons/logo.svg" alt="ToDo logo"></div>
                 <h2>ToDo</h2>
             </RouterLink>
