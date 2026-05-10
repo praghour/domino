@@ -16,7 +16,7 @@ const { addTask, getTodayDate } = useTask();
 const form = reactive({
     name: '',
     description: '',
-    subtasks: ['', '', '', ''],
+    subtasks: ['', '', ''],
     date: '',
     priority: 'Низкий'
 });
@@ -63,7 +63,7 @@ function validateForm() {
 function resetForm() {
     form.name = '';
     form.description = '';
-    form.subtasks = ['', '', '', ''];
+    form.subtasks = ['', '', ''];
     form.date = '';
     form.priority = 'Низкий';
 
@@ -206,7 +206,7 @@ function createTask() {
     width: 552px;
     max-height: calc(100vh - 40px);
 
-    padding: 20px;
+    padding: 18px;
     box-sizing: border-box;
 
     background: #ffffff;
@@ -214,7 +214,7 @@ function createTask() {
 
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 10px;
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -270,7 +270,7 @@ function createTask() {
 
     display: flex;
     flex-direction: column;
-    gap: 11px;
+    gap: 7px;
 }
 
 .form_group label {
@@ -305,7 +305,7 @@ function createTask() {
 }
 
 .form_group textarea {
-    height: 116px;
+    height: 80px;
     resize: none;
 }
 
@@ -324,7 +324,7 @@ function createTask() {
 
     display: flex;
     flex-direction: column;
-    gap: 11px;
+    gap: 7px;
 }
 
 .subtasks input {
