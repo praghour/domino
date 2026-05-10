@@ -6,20 +6,31 @@ import useAquarium from '../composables/useAquarium.js';
 import useGacha from '../composables/useGacha.js';
 import useMoney from '../composables/useMoney.js';
 
+const possibleBosses = ref([
+  { id: 1, img: '/Aquarium/boss1.png', name: 'ЗЛАЯ РЫБКА1' },
+  { id: 2, img: '/Aquarium/boss2.png', name: 'ЗЛАЯ РЫБКА2' },
+  { id: 3, img: '/Aquarium/boss3.png', name: 'ЗЛАЯ РЫБКА3' },
+  { id: 4, img: '/Aquarium/boss4.png', name: 'ЗЛАЯ РЫБКА4' },
+  { id: 5, img: '/Aquarium/boss5.png', name: 'ЗЛАЯ РЫБКА5' }
+]);
+
 const router = useRouter();
-const { party, bossList, addFishtoParty, removeFishFromParty, fishList, addOrUpdateFish } = useFishman();
+const { party, addFishtoParty, removeFishFromParty, fishList, addOrUpdateFish } = useFishman();
 const { gacha, win, lastFish } = useGacha();
 const aquarium = useAquarium();
 const maxTeamHP = computed(() => calculateTeamHP());
-// Обновляем доступных рыб в аквариуме при изменении win
+const currentBoss = ref({ ...possibleBosses.value[0] });
+
+const getRandomBoss = () => {
+  const randomIndex = Math.floor(Math.random() * possibleBosses.value.length);
+  return { ...possibleBosses.value[randomIndex] };
+};
+
 watch(win, (newWin) => {
   const winIds = newWin.map(fish => fish.id);
   aquarium.updateAvailableFish(winIds);
 }, { deep: true, immediate: true });
 
-
-
-// БАБКИ
 const { findCurrency } = useMoney();
 
 const userMoney = computed(() => {
@@ -31,9 +42,7 @@ const userCrystals = computed(() => {
   const crystal = findCurrency('crystal');
   return crystal ? crystal.count : 0;
 });
-// БАБКИ
 
-// === БОЕВАЯ СИСТЕМА ===
 const bossHealth = ref(100);
 const bossDamage = ref(2);
 const currentbosshp = computed(() => bossHealth.value);
@@ -41,8 +50,79 @@ const maxBossHealth = ref(100);
 const teamHP = ref(0);
 const originalTeamHP = ref(0);
 const isFighting = ref(false);
-const bosslvl = ref(1)
+const bosslvl = ref(1);
+const bossDefeatedCount = ref(0);
+const showVictoryModal = ref(false);
+const earnedCrystals = ref(0);
 let fightInterval = null;
+
+const floatingDamages = ref([]);
+const floatingHeals = ref([]);
+const floatingBossDamages = ref([]);
+const attackingFish = ref([]);
+const healingFish = ref([]);
+const isBossHit = ref(false);
+const isBossAttacking = ref(false);
+let damageId = 0;
+
+const addFloatingDamage = (value, fishId) => {
+  const id = damageId++;
+  const x = Math.random() * 80 + 20;
+  const y = Math.random() * 80 + 20;
+  floatingDamages.value.push({ id, value, x, y, fishId });
+  setTimeout(() => {
+    floatingDamages.value = floatingDamages.value.filter(d => d.id !== id);
+  }, 800);
+};
+
+const addFloatingHeal = (value, fishId) => {
+  const id = damageId++;
+  const x = Math.random() * 60 + 20;
+  const y = -20 - Math.random() * 30;
+  floatingHeals.value.push({ id, value, x, y, fishId });
+  setTimeout(() => {
+    floatingHeals.value = floatingHeals.value.filter(h => h.id !== id);
+  }, 800);
+};
+
+const addFloatingBossDamage = (value) => {
+  const id = damageId++;
+  const x = Math.random() * 200 + 50;
+  const y = Math.random() * 150 + 200;
+  floatingBossDamages.value.push({ id, value, x, y });
+  setTimeout(() => {
+    floatingBossDamages.value = floatingBossDamages.value.filter(d => d.id !== id);
+  }, 800);
+};
+
+const triggerBossHit = () => {
+  isBossHit.value = true;
+  setTimeout(() => {
+    isBossHit.value = false;
+  }, 200);
+};
+
+const triggerBossAttack = () => {
+  isBossAttacking.value = true;
+  setTimeout(() => {
+    isBossAttacking.value = false;
+  }, 300);
+};
+
+const triggerFishAttack = (fishIds) => {
+  attackingFish.value = fishIds;
+  setTimeout(() => {
+    attackingFish.value = [];
+  }, 300);
+};
+
+const triggerFishHeal = (fishIds) => {
+  healingFish.value = fishIds;
+  setTimeout(() => {
+    healingFish.value = [];
+  }, 500);
+};
+
 const abilitydamage = computed(() => {
   let totalDamage = 0;
   for (const fishy of party.value) {
@@ -62,6 +142,7 @@ const abilityheal = computed(() => {
   }
   return totalHeal;
 });
+
 const calculateTeamHP = () => {
   let total = 0;
   for (const fish of party.value) {
@@ -70,31 +151,26 @@ const calculateTeamHP = () => {
   return total;
 };
 
-// Обновляем HP команды
 const updateTeamHP = () => {
   teamHP.value = calculateTeamHP();
   originalTeamHP.value = calculateTeamHP();
 };
 
-// Процент HP команды для полоски
 const teamHealthPercent = computed(() => {
   if (originalTeamHP.value === 0) return 0;
   return (teamHP.value / originalTeamHP.value) * 100;
 });
 
-// Процент HP босса для полоски
 const bossHealthPercent = computed(() => {
   return (bossHealth.value / maxBossHealth.value) * 100;
 });
 
-// Цвет полоски HP в зависимости от процента
 const getHealthBarColor = (percent) => {
   if (percent > 60) return '#4CAF50';
   if (percent > 30) return '#FFC107';
   return '#F44336';
 };
 
-// Общий урон рыбок
 const fishDamage = computed(() => {
   let currentdamage = 0;
   for (const fish of party.value) {
@@ -103,7 +179,6 @@ const fishDamage = computed(() => {
   return currentdamage;
 });
 
-// Старт боя
 function startFight() {
   if (party.value.length === 0) {
     console.log('Нет рыбок в отряде!');
@@ -115,6 +190,9 @@ function startFight() {
   bossHealth.value = 100;
   bossDamage.value = 2;
   maxBossHealth.value = 100;
+  bosslvl.value = 1;
+  bossDefeatedCount.value = 0;
+  currentBoss.value = { ...possibleBosses.value[0] };
   isFighting.value = true;
   fight();
 }
@@ -125,41 +203,97 @@ function fight() {
   fightInterval = setInterval(() => {
     if (!isFighting.value) return;
     
-    // Проверка жива ли команда перед атакой
     if (teamHP.value <= 0) {
       stopFight();
       return;
     }
     
-    // 1. Рыбки атакуют босса
     const totalFishDmg = fishDamage.value;
     const totalabilitydmg = abilitydamage.value;
     const totalabilityheal = abilityheal.value;
+    
+    if (totalFishDmg > 0) {
+      triggerBossHit();
+      
+      const attackingFishIds = [];
+      for (const fish of party.value) {
+        attackingFishIds.push(fish.id);
+        addFloatingDamage(Number(fish.damage), fish.id);
+      }
+      triggerFishAttack(attackingFishIds);
+    }
+    
+    if (totalabilitydmg > 0) {
+      for (const fish of party.value) {
+        if (fish.abilitytype === 'damage') {
+          addFloatingDamage(Number(fish.abilityvalue), fish.id);
+        }
+      }
+    }
+    
     bossHealth.value = Math.max(0, bossHealth.value - totalFishDmg - totalabilitydmg);
     
-    // 2. Проверка на смерть босса
     if (bossHealth.value <= 0) {
+      bossDefeatedCount.value++;
+      
+      if (bossDefeatedCount.value >= 5) {
+        stopFight();
+        isFighting.value = false;
+        earnedCrystals.value = 1;
+        const crystal = findCurrency('crystal');
+        if (crystal) {
+          crystal.count += 1;
+        }
+        showVictoryModal.value = true;
+        return;
+      }
+      
+      const newBoss = getRandomBoss();
+      currentBoss.value = newBoss;
       maxBossHealth.value += 25;
       bossHealth.value = maxBossHealth.value;  
       bossDamage.value = bossDamage.value + 2;
-      bosslvl.value = bosslvl.value +1;
-      console.log('Босс возродился с новыми силами! HP:', maxBossHealth.value, 'Урон:', bossDamage.value);
+      bosslvl.value = bosslvl.value + 1;
+      
+      console.log(`Новый босс: ${newBoss.name}! HP: ${maxBossHealth.value}, Урон: ${bossDamage.value}`);
       return;
     }
     
-   if (teamHP.value > 0) {
+    if (teamHP.value > 0) {
       let newTeamHP = Math.min(teamHP.value + totalabilityheal, maxTeamHP.value);
-      newTeamHP = newTeamHP - bossDamage.value;
+      const healAmount = newTeamHP - teamHP.value;
+      
+      if (healAmount > 0) {
+        const healingFishIds = [];
+        for (const fish of party.value) {
+          if (fish.abilitytype === 'heal') {
+            healingFishIds.push(fish.id);
+            addFloatingHeal(Number(fish.abilityvalue), fish.id);
+          }
+        }
+        if (healingFishIds.length > 0) {
+          triggerFishHeal(healingFishIds);
+        }
+      }
+      
+      const damageToTeam = bossDamage.value;
+      newTeamHP = newTeamHP - damageToTeam;
+      
+      if (damageToTeam > 0) {
+        triggerBossAttack();
+        addFloatingBossDamage(damageToTeam);
+      }
+      
       teamHP.value = Math.max(0, newTeamHP);
     }
-    // 4. Проверка поражения
+    
     if (teamHP.value <= 0) {
       console.log('Команда побеждена!');
       isFighting.value = false;
       stopFight();
     }
     
-  }, 3000);
+  }, 1000);
 }
 
 function stopFight() {
@@ -173,7 +307,6 @@ function stopFight() {
 function restartFight() {
   stopFight();
   
-  // Восстанавливаем здоровье всех рыб в партии
   for (const fish of party.value) {
     const originalFish = fishList.value.find(f => f.id === fish.id);
     if (originalFish) {
@@ -185,16 +318,22 @@ function restartFight() {
   bossHealth.value = 100;
   bossDamage.value = 2;
   maxBossHealth.value = 100;
-  bosslvl.value = 1
+  bosslvl.value = 1;
+  bossDefeatedCount.value = 0;
+  currentBoss.value = { ...possibleBosses.value[0] };
   startFight();
 }
 
-// Фиксированный фон арены
+function closeVictoryModalAndRestart() {
+  showVictoryModal.value = false;
+  bossDefeatedCount.value = 0;
+  restartFight();
+}
+
 const currentFon = computed(() => {
   return { src: '/Aquarium/fonarena.png' };
 });
 
-// === ВЕРТИКАЛЬНЫЙ СЛАЙДЕР (выбор в party) - только когда не в бою ===
 const currentIndexArena = ref(0);
 const selectedArenaIds = ref([]);
 
@@ -220,9 +359,9 @@ function selectArenaCard(fish) {
       removeFishFromParty(fish.id);
     } else {
       addFishtoParty(fish.id);
+      updateSelectedArenaIds();
+      updateTeamHP();
     }
-    updateSelectedArenaIds();
-    updateTeamHP();
   }
 }
 
@@ -253,13 +392,11 @@ function isFishInParty(fishId) {
   return party.value.some(fish => fish.id === fishId);
 }
 
-// Обновляем подсветку при изменении party
 watch(party, () => {
   updateSelectedArenaIds();
   updateTeamHP();
 }, { deep: true });
 
-// === ГАЧА МОДАЛКИ ===
 const showGachaModal = ref(false);
 const showWinModal = ref(false);
 
@@ -279,9 +416,8 @@ onBeforeUnmount(() => {
 });
 
 const onGachaClick = () => {
- gacha(); // получаем новую рыбку (lastFish)
+  gacha();
   
-  // ОБНОВЛЯЕМ КОЛЛЕКЦИЮ
   if (lastFish.value) {
     addOrUpdateFish(lastFish.value);
   }
@@ -304,7 +440,6 @@ function goToAquarium() {
 <template>
 <div class="arena-page">
     <div class="sidebar">
-        <!-- БАЛАНС -->
         <div class="your-balanceArena">
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
@@ -315,12 +450,8 @@ function goToAquarium() {
             </div>
         </div>
 
-
-        <!-- НАСТРОЙКИ -->
         <div class="game-settings">
             <p class="gs-p">Настройки</p>  
-            
-            <!-- ВЕРТИКАЛЬНЫЙ СЛАЙДЕР (Рыбки НА АРЕНУ) -->
             <p class="gs-p2">Рыбки на арену</p>  
             <div class="slider-arena">   
                 <button class="control-btn-arena-up" @click="prevSlideArena()">
@@ -328,8 +459,7 @@ function goToAquarium() {
                 </button>
                 <div class="slides-arena">
                     <div class="slide-arena">
-                        <div 
-                            v-for="fish in visibleArenaSlides" :key="fish.id" class="arena-item"> 
+                        <div v-for="fish in visibleArenaSlides" :key="fish.id" class="arena-item"> 
                             <button class="arena-fish-btn"
                                 :class="{ 'active-arena': isFishInParty(fish.id) }"
                                 @click="selectArenaCard(fish)">
@@ -348,7 +478,6 @@ function goToAquarium() {
             </div>
         </div>  
 
-        <!-- РЕЖИМ ИГРЫ -->
         <div class="game-mode"> 
             <p class="gm-p">Режим игры</p>
             <div class="gm-btns">
@@ -358,24 +487,32 @@ function goToAquarium() {
         </div>
     </div>
 
-    <!-- АРЕНА с фоном -->
     <div class="arena-container">
         <div style="position: relative; width: 935px; height: 550px;">
-            <!-- ФОН арены -->
             <img :src="currentFon.src" alt="фон арены" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
             
             <div class="boss-image">
-                <div v-for="boss in bossList" :key="boss.id" class="boss-card">
-                    <img :src="boss.img" width="120px" :alt="boss.name">
+                <div class="boss-card" :class="{ 'boss-hit': isBossHit, 'boss-attacking': isBossAttacking }">
+                    <img :src="currentBoss.img" width="120px" :alt="currentBoss.name">
+                    <div v-for="damage in floatingDamages" :key="damage.id" class="floating-damage" :style="{ left: damage.x + 'px', top: damage.y + 'px' }">
+                        -{{ damage.value }}
+                    </div>
                 </div>
             </div>   
             
-            <div class="team-fish-left">
-                <div v-for="(fish, index) in party" :key="fish.id" class="arena-fish-card">
-                    <img :src="fish.img" width="45px" :alt="fish.name">
-                </div>
-            </div>           
-            <!-- Команда игрока (слева) -->
+           <div class="team-fish-left">
+    <div v-for="fish in party" :key="fish.id" class="arena-fish-card" 
+        :class="{ 'fish-attack': attackingFish.includes(fish.id), 'fish-heal': healingFish.includes(fish.id) }">
+        <img :src="fish.img" width="45px" :alt="fish.name">
+        <div v-for="heal in floatingHeals.filter(h => h.fishId === fish.id)" :key="heal.id" class="floating-heal" :style="{ left: heal.x + 'px', top: heal.y + 'px' }">
+            +{{ heal.value }}
+        </div>
+    </div>
+</div>
+            <div v-for="bossDamage in floatingBossDamages" :key="bossDamage.id" class="floating-boss-damage" :style="{ left: bossDamage.x + 'px', top: bossDamage.y + 'px' }">
+                -{{ bossDamage.value }}
+            </div>
+            
             <div class="arena-team">
                 <div class="team-stats">
                     <p>Ваша команда</p>
@@ -384,20 +521,11 @@ function goToAquarium() {
                         <span>DMG: {{ fishDamage }}</span>
                     </div>
                 </div>
-                <!-- Полоска HP команды -->
                 <div class="health-bar-container">
-                    <div 
-                        class="health-bar-fill"
-                        :style="{
-                            width: teamHealthPercent + '%',
-                            backgroundColor: getHealthBarColor(teamHealthPercent)
-                        }"
-                    ></div>
+                    <div class="health-bar-fill" :style="{ width: teamHealthPercent + '%', backgroundColor: getHealthBarColor(teamHealthPercent) }"></div>
                 </div>
-
             </div>
             
-            <!-- Босс (справа) -->
             <div class="arena-boss">
                 <div class="boss-header">
                     <h3>БОСС</h3>
@@ -407,31 +535,21 @@ function goToAquarium() {
                     <span>HP: <strong>{{ currentbosshp }} / {{ maxBossHealth }}</strong></span>
                     <span>DMG: {{ bossDamage }}</span>
                 </div>
-                <!-- Полоска HP босса -->
                 <div class="health-bar-container boss-health">
-                    <div 
-                        class="health-bar-fill"
-                        :style="{
-                            width: bossHealthPercent + '%',
-                            backgroundColor: getHealthBarColor(bossHealthPercent)
-                        }"
-                    ></div>
+                    <div class="health-bar-fill" :style="{ width: bossHealthPercent + '%', backgroundColor: getHealthBarColor(bossHealthPercent) }"></div>
                 </div>
             </div>
 
-            <!-- Кнопка начала боя -->
             <div v-if="!isFighting && party.length > 0" class="start-battle">
                 <p>Начать игру?</p>
                 <button class="start-battle-btn" @click="startFight">В БОЙ!</button>
             </div>
 
-            <!-- Сообщение о поражении -->
             <div v-if="!isFighting && teamHP <= 0 && party.length > 0" class="game-over">
                 <p>Поражение!</p>
                 <button class="game-over-btn" @click="restartFight">Начать заново</button>
             </div>
 
-            <!-- Затемнение если нет рыбок -->
             <div v-if="party.length === 0 && !isFighting" class="no-fish-message">
                 <p>Нет рыбок в отряде</p>
                 <p>Добавьте рыбок в аквариуме</p>
@@ -439,7 +557,6 @@ function goToAquarium() {
         </div>
     </div>
 
-    <!-- ГАЧА МОДАЛКА -->
     <div v-if="showGachaModal" class="overlay" @click="showGachaModal = false"></div>
     <div class="gacha" v-if="showGachaModal" @click.self="showGachaModal = false">
         <div class="gacha-hed">
@@ -472,7 +589,6 @@ function goToAquarium() {
         </div>
     </div>
 
-    <!-- ВЫИГРЫШ МОДАЛКА -->
     <div v-if="showWinModal && lastFish" class="overlay" @click="showWinModal = false"></div>
     <div class="winmodal" v-if="showWinModal && lastFish">
         <div class="gacha-hed">
@@ -483,6 +599,20 @@ function goToAquarium() {
             <h3 class="win-fish-name">{{ lastFish.name }}</h3>
             <h3 class="win-fish-name">{{ lastFish.rarity }}</h3>
             <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
+        </div>
+    </div>
+
+    <div v-if="showVictoryModal" class="overlay" @click="showVictoryModal = false"></div>
+    <div class="victory-modal" v-if="showVictoryModal">
+        <div class="victory-content">
+            <div class="victory-icon">🏆</div>
+            <h2 class="victory-title">ПОБЕДА!</h2>
+            <p class="victory-text">Вы победили 5 боссов подряд!</p>
+            <div class="victory-reward">
+                <img src="/Aquarium/crystals.png" alt="" class="reward-icon">
+                <span class="reward-amount">+{{ earnedCrystals }}</span>
+            </div>
+            <button class="victory-btn" @click="closeVictoryModalAndRestart">Продолжить</button>
         </div>
     </div>
 </div>
@@ -518,7 +648,6 @@ function goToAquarium() {
   border: 1px solid #E5EAF1;
 }
 
-/* БАЛАНС АРЕНА */
 .your-balanceArena {
   width: 348px;
   height: 97px;
@@ -526,7 +655,6 @@ function goToAquarium() {
   display: flex;
   justify-content: space-between;
   position: relative;
-
 }
 
 .balance-info {
@@ -572,9 +700,7 @@ function goToAquarium() {
   height: 28px;
   object-fit: contain;
 }
-/* БАЛАНС АРЕНА */
 
-/* НАСТРОЙКИ */
 .game-settings {
   width: 348px;
   height: auto;
@@ -582,8 +708,6 @@ function goToAquarium() {
   padding: 20px;
 }
 
-
-/* Рыбы команды слева, напротив босса */
 .team-fish-left {
   position: absolute;
   left: 50px;
@@ -592,68 +716,68 @@ function goToAquarium() {
   z-index: 5;
 }
 
-/* Первая рыба */
+.arena-fish-card {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
 .arena-fish-card:nth-child(1) {
   position: relative;
   top: 80px;
 }
 
-/* Вторая рыба */
 .arena-fish-card:nth-child(2) {
   position: relative;
   top: 40px;
   left: 120px;
 }
 
-/* Третья рыба */
 .arena-fish-card:nth-child(3) {
   position: relative;
   top: 10px;
 }
 
-/* Четвертая рыба */
 .arena-fish-card:nth-child(4) {
   position: relative;
   top: -10px;
   left: 120px;
 }
 
-/* Анимация движения рыб */
 .arena-fish-card {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Разные задержки для каждой рыбы */
-.arena-fish-card:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.arena-fish-card:nth-child(2) {
-  animation-delay: 0.5s;
-}
-
-.arena-fish-card:nth-child(3) {
-  animation-delay: 1s;
-}
-
-.arena-fish-card:nth-child(4) {
-  animation-delay: 1.5s;
-}
+.arena-fish-card:nth-child(1) { animation-delay: 0s; }
+.arena-fish-card:nth-child(2) { animation-delay: 0.5s; }
+.arena-fish-card:nth-child(3) { animation-delay: 1s; }
+.arena-fish-card:nth-child(4) { animation-delay: 1.5s; }
 
 @keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+  0%, 100% { transform: translateY(0px) translateX(0); }
+  50% { transform: translateY(-8px) translateX(0); }
+}
+
+.fish-attack {
+  animation: fishAttackAnim 0.3s ease-in-out !important;
+}
+
+@keyframes fishAttackAnim {
+  0% { transform: translateX(0px) translateY(0px); }
+  50% { transform: translateX(40px) translateY(-15px); }
+  100% { transform: translateX(0px) translateY(0px); }
+}
+
+.fish-heal {
+  animation: fishHealAnim 0.5s ease-in-out !important;
+}
+
+@keyframes fishHealAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); filter: brightness(1.3); }
+  100% { transform: scale(1); }
 }
 
 .arena-fish-card img {
-
   width: 120px;
   height: 101px;
   object-fit: cover;
@@ -680,7 +804,6 @@ function goToAquarium() {
   margin-top: 20px;
 }
 
-/* ВЕРТИКАЛЬНЫЙ СЛАЙДЕР */
 .slider-arena {
   display: flex;
   flex-direction: column;
@@ -764,7 +887,6 @@ function goToAquarium() {
   color: #67758A;
 }
 
-/* РЕЖИМ ИГРЫ */
 .game-mode {
   width: 348px;
   height: 116px;
@@ -812,7 +934,6 @@ function goToAquarium() {
   border-color: #E5EAF1;
 }
 
-/* АРЕНА */
 .arena-container {
   width: 975px;
   background-color: #ffffff;
@@ -854,7 +975,6 @@ function goToAquarium() {
   gap: 20px;
 }
 
-/* Стили для полосок HP */
 .health-bar-container {
   width: 286px;
   height: 20px;
@@ -874,7 +994,6 @@ function goToAquarium() {
   margin-bottom: 15px;
 }
 
-/* Босс - стили как у команды игрока, но с выравниванием вправо */
 .arena-boss {
   position: absolute;
   right: 20px;
@@ -923,8 +1042,12 @@ function goToAquarium() {
 }
 
 .boss-card {
+  position: relative;
   text-align: center;
   margin: 0;
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 0.3s;
+  transition: all 0.1s ease;
 }
 
 .boss-card img {
@@ -933,23 +1056,90 @@ function goToAquarium() {
   object-fit: contain;
 }
 
-/* Анимация для босса */
-.boss-card {
-  text-align: center;
-  margin: 0;
-  animation: float 3s ease-in-out infinite;
-  animation-delay: 0.3s;
+.boss-hit {
+  animation: bossHitAnim 0.2s ease-in-out !important;
 }
 
-@keyframes float {
+@keyframes bossHitAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); filter: brightness(0.5); }
+  100% { transform: scale(1); }
+}
+
+.boss-attacking {
+  animation: bossAttackAnim 0.3s ease-in-out !important;
+}
+
+@keyframes bossAttackAnim {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(-20px); }
+  70% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}
+
+.floating-damage {
+  position: absolute;
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 2px 2px 0px #000;
+  pointer-events: none;
+  animation: floatUp 0.8s ease-out forwards;
+  z-index: 100;
+}
+
+.floating-heal {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: #44ff44;
+  text-shadow: 1px 1px 0px #000;
+  pointer-events: none;
+  animation: floatUpHeal 0.8s ease-out forwards;
+  z-index: 100;
+}
+
+.floating-boss-damage {
+  position: absolute;
+  font-size: 30px;
+  font-weight: bold;
+  color: #ff6666;
+  text-shadow: 2px 2px 0px #000;
+  pointer-events: none;
+  animation: floatUpBoss 0.8s ease-out forwards;
+  z-index: 100;
+}
+
+@keyframes floatUp {
   0% {
+    opacity: 1;
     transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
   }
   100% {
+    opacity: 0;
+    transform: translateY(-80px);
+  }
+}
+
+@keyframes floatUpHeal {
+  0% {
+    opacity: 1;
     transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+}
+
+@keyframes floatUpBoss {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px);
   }
 }
 
@@ -995,7 +1185,6 @@ function goToAquarium() {
   background-color: #1a5bc4;
 }
 
-/* Проигрыш */
 .game-over {
   position: absolute;
   top: 50%;
@@ -1039,7 +1228,6 @@ function goToAquarium() {
   color: white;
 }
 
-/* ОВЕРЛЕЙ ДЛЯ МОДАЛОК */
 .overlay {
   position: fixed;
   top: 0;
@@ -1051,7 +1239,6 @@ function goToAquarium() {
   backdrop-filter: blur(5px);
 }
 
-/* ГАЧА СТИЛИ */
 .gacha {
   position: fixed;
   top: 50%;
@@ -1080,6 +1267,86 @@ function goToAquarium() {
   z-index: 1001;
   text-align: center;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.victory-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: auto;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 30px;
+  color: white;
+  z-index: 1001;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.victory-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.victory-icon {
+  font-size: 64px;
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.victory-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.victory-text {
+  font-size: 16px;
+  margin: 0;
+}
+
+.victory-reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 50px;
+}
+
+.reward-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.reward-amount {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.victory-btn {
+  padding: 10px 30px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.victory-btn:hover {
+  transform: scale(1.05);
 }
 
 .win-content {
@@ -1193,5 +1460,18 @@ function goToAquarium() {
 .open-btn:hover {
   background-color: #2D78F5;
   color: #FEFEFE;
+}
+
+.no-fish-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 100;
 }
 </style>

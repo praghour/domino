@@ -15,7 +15,6 @@ const router = useRouter();
 
 const { showNotice } = useNotice();
 const { tasks, deleteTask, editTask, saveTasksToStorage } = useTask();
-const { tasks, deleteTask, saveTasksToStorage } = useTask();
 const { findCurrency } = useMoney();
   
 const activeFilter = ref('all');
