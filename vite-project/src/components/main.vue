@@ -3,11 +3,24 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import useNotice from '../composables/useNotice';
 import useTask from '../composables/useTask';
+import useMoney from '../composables/useMoney.js';
 
 const router = useRouter();
 
 const { showNotice } = useNotice();
 const { tasks, deleteTask, saveTasksToStorage } = useTask();
+const { findCurrency } = useMoney();
+
+//бабосики 
+const userMoney = computed(() => {
+  const money = findCurrency('money');
+  return money ? money.count : 0;
+});
+
+const userCrystals = computed(() => {
+  const crystal = findCurrency('crystal');
+  return crystal ? crystal.count : 0;
+});
 
 const activeFilter = ref('all');
 
@@ -157,8 +170,8 @@ function openTimer() {
                     <button class="game_button" @click="openAquarium">Перейти в игру</button>
                 </div>
                 <div class="game_stats">
-                    <span>10 <img src="/icons/coin.svg" alt="Монеты"></span>
-                    <span>10 <img src="/icons/crystal.svg" alt="Кристаллы"></span>
+                    <span>{{ userMoney }}<img src="/icons/coin.svg" alt="Монеты"></span>
+                    <span>{{ userCrystals }}<img src="/icons/crystal.svg" alt="Кристаллы"></span>
                 </div>
             </div>
 
@@ -397,6 +410,11 @@ button {
   justify-content: center;
   gap: 35px;
   margin-top: 12px;
+}
+
+.game_stats span {
+    font-family: 'FRM3216x16', 'FRM325x8', monospace;
+    font-size: 16px;
 }
 
 .game_stats span {
