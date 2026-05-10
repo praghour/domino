@@ -602,12 +602,9 @@ function goToAquarium() {
         <div style="position: relative; width: 935px; height: 550px;">
             <img :src="currentFon.src" alt="фон арены" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
             
-            <!-- СТАТИСТИКА НА ЭКРАНЕ -->
+           <!-- кнопка выхода из боя -->
             <div class="stats-panel">
-                <div class="stat-item">🏆 Побед: {{ totalWins }}</div>
-                <div class="stat-item">💀 Поражений: {{ totalLosses }}</div>
-                <!-- КНОПКА ВЫХОДА ИЗ БОЯ -->
-                <button v-if="isFighting" class="exit-battle-btn" @click="exitBattle">🚪 Выйти</button>
+                <button v-if="isFighting" class="exit-battle-btn" @click="exitBattle">Завершить бой</button>
             </div>
             
             <div class="boss-image">
@@ -745,21 +742,12 @@ function goToAquarium() {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
   padding: 8px 16px;
   border-radius: 20px;
   display: flex;
   gap: 20px;
   z-index: 20;
-  backdrop-filter: blur(5px);
   align-items: center;
-}
-
-.stat-item {
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  font-family: 'FRM3216x16', monospace;
 }
 
 .exit-battle-btn {
@@ -767,11 +755,12 @@ function goToAquarium() {
   border: none;
   color: white;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 12px;
   font-weight: bold;
   transition: all 0.2s;
+  font-family: 'FRM3216x16', monospace;
 }
 
 .exit-battle-btn:hover {
@@ -779,7 +768,6 @@ function goToAquarium() {
   transform: scale(1.05);
 }
 
-/* остальные стили такие же как в твоем оригинале */
 * {
   margin: 0;
   padding: 0;
