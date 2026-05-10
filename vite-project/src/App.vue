@@ -2,12 +2,20 @@
 import { RouterView } from 'vue-router';
 import useNotice from './composables/useNotice';
 
+import AppHeader from './components/AppHeader.vue';
+import AppFooter from './components/AppFooter.vue';
+
 const { notice, isNoticeVisible } = useNotice();
 </script>
 
 <template>
     <div class="app">
+        <AppHeader />
+
         <RouterView />
+
+        <AppFooter />
+
         <!-- выведение уведомлений поверх всего -->
         <div v-if="isNoticeVisible" class="notice_box">
             <div class="notice_icon">⚠</div>
@@ -20,6 +28,12 @@ const { notice, isNoticeVisible } = useNotice();
 </template>
 
 <style scoped>
+.app {
+    min-height: 100vh;
+    background: #f8fafc;
+    font-family: 'Jost', Arial, sans-serif;
+}
+
 .notice_box {
     position: fixed;
     bottom: 20px;
