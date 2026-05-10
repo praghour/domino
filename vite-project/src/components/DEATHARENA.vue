@@ -309,8 +309,8 @@ function goToAquarium() {
             <div class="balance-info">
                 <p class="yb-p">Ваш баланс</p>
                 <div class="balance-arena">
-                    <div class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></div>
-                    <div class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></div>
+                    <div class="balance-item"><p>{{ userMoney }}</p><img src="/Aquarium/money.png" alt=""></div>
+                    <div class="balance-item"><p>{{ userCrystals }}</p><img src="/Aquarium/crystals.png" alt=""></div>
                 </div>
             </div>
         </div>
@@ -554,6 +554,10 @@ function goToAquarium() {
   font-size: 20px;
   color: #1A1A1A;
   margin: 0;
+}
+
+.balance-arena p {
+    font-family: 'FRM3216x16', 'FRM325x8', monospace;
 }
 
 .balance-item img {
