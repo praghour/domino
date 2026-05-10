@@ -75,9 +75,9 @@ export default function useGacha() {
       } else {
         // Если рыба уже есть - увеличиваем урон и хп на 1
         const existingFish = win.value[existingIndex];
-        existingFish.damage = (existingFish.damage) + 1;
-        existingFish.health = (existingFish.health) + 1;
-        existingFish.lvl = (existingFish.lvl) +1;
+          existingFish.damage = (existingFish.damage) + 1;
+          existingFish.health = (existingFish.health) + 1;
+          existingFish.lvl = (existingFish.lvl) +1;
         // Обновляем lastFish копией улучшенной рыбы
         lastFish.value = { ...existingFish };
         

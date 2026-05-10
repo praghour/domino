@@ -3,7 +3,6 @@ import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import useFishman from '../composables/Arena';
 import useAquarium from '../composables/useAquarium.js';
-import useGacha from '../composables/useGacha.js';
 import useMoney from '../composables/useMoney.js';
 import useNotice from '../composables/useNotice.js';
 const possibleBosses = ref([
@@ -16,7 +15,6 @@ const possibleBosses = ref([
 
 const router = useRouter();
 const { party, addFishtoParty, removeFishFromParty, fishList, addOrUpdateFish } = useFishman();
-const { gacha, win, lastFish } = useGacha();
 const aquarium = useAquarium();
 const maxTeamHP = computed(() => calculateTeamHP());
 const currentBoss = ref({ ...possibleBosses.value[0] });
@@ -25,11 +23,6 @@ const getRandomBoss = () => {
   const randomIndex = Math.floor(Math.random() * possibleBosses.value.length);
   return { ...possibleBosses.value[randomIndex] };
 };
-
-watch(win, (newWin) => {
-  const winIds = newWin.map(fish => fish.id);
-  aquarium.updateAvailableFish(winIds);
-}, { deep: true, immediate: true });
 
 const { findCurrency, addCurrency, spendCurrency } = useMoney();
 const { showNotice } = useNotice();
@@ -431,7 +424,9 @@ const currentIndexArena = ref(0);
 const selectedArenaIds = ref([]);
 
 const visibleArenaSlides = computed(() => {
-  return aquarium.availableFish.value.slice(currentIndexArena.value, currentIndexArena.value + 3);
+  // Берем всех рыб с флагом isUnlocked и фильтруем только разблокированных
+  const unlockedFish = (aquarium.allFishWithStatus?.value || []).filter(fish => fish.isUnlocked === true);
+  return unlockedFish.slice(currentIndexArena.value, currentIndexArena.value + 3);
 });
 
 function nextSlideArena() {
@@ -490,16 +485,10 @@ watch(party, () => {
   updateTeamHP();
 }, { deep: true });
 
-const showGachaModal = ref(false);
-const showWinModal = ref(false);
-
 onMounted(() => {
   aquarium.startAnimation();
-  
-  const winIds = win.value.map(fish => fish.id);
-  aquarium.updateAvailableFish(winIds);
-  
-  updateSelectedArenaIds();
+
+
   updateTeamHP();
   
   loadProgress();
@@ -511,37 +500,6 @@ onBeforeUnmount(() => {
   aquarium.stopAnimation();
   saveProgress();
 });
-
-const onGachaClick = () => {
-  const money = findCurrency('money');
-  
-  if (!money || money.count < 10) {
-    showNotice('Ошибка', 'Недостаточно монет! Нужно 10 монет для открытия сундука.');
-    return;
-  }
-  
-  const success = spendCurrency('money', 10);
-  
-  if (!success) {
-    showNotice('Ошибка', 'Не удалось списать монеты. Попробуйте снова.');
-    return;
-  }
-  
-  gacha();
-  
-  if (lastFish.value) {
-    addOrUpdateFish(lastFish.value);
-  }
-  
-  const winIds = win.value.map(fish => fish.id);
-  aquarium.updateAvailableFish(winIds);
-  showGachaModal.value = false;
-  showWinModal.value = true;
-};
-
-function closeWinModal() {
-  showWinModal.value = false;
-}
 
 function goToAquarium() {
   router.push({ name: 'aquarium' });
@@ -672,52 +630,6 @@ function goToAquarium() {
             </div>
         </div>
     </div>
-
-    <div v-if="showGachaModal" class="overlay" @click="showGachaModal = false"></div>
-    <div class="gacha" v-if="showGachaModal" @click.self="showGachaModal = false">
-        <div class="gacha-hed">
-            <p>Испытай удачу</p>
-            <button class="close" @click="showGachaModal = false"><img src="/gacha/close.jpg" alt=""></button>
-        </div>
-        <div class="balance-gacha">
-            <p>Ваш баланс</p>
-            <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
-        </div>
-        <div class="select-chest">
-            <p class="ppp">Выберите сундук</p>
-        </div>
-        <div class="chest-cards">
-            <div class="chest-card">
-                <img src="/gacha/chest.png" alt="">
-                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
-                <button class="open-btn" @click="onGachaClick">Открыть</button>
-            </div>
-            <div class="chest-card">
-                <img src="/gacha/chest.png" alt="">
-                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
-                <button class="open-btn" @click="onGachaClick">Открыть</button>
-            </div>
-            <div class="chest-card">
-                <img src="/gacha/chest.png" alt="">
-                <p class="balance-item">10<img src="/Aquarium/money.png" style="width: 16px; height: 16px;" alt=""></p>
-                <button class="open-btn" @click="onGachaClick">Открыть</button>
-            </div>
-        </div>
-    </div>
-
-    <div v-if="showWinModal && lastFish" class="overlay" @click="showWinModal = false"></div>
-    <div class="winmodal" v-if="showWinModal && lastFish">
-        <div class="gacha-hed">
-            <button class="close" @click="showWinModal = false"><img src="/gacha/close.jpg" alt=""></button>
-        </div>
-        <div class="win-content">
-            <img :src="lastFish.img" :alt="lastFish.alt" class="win-fish-img">
-            <h3 class="win-fish-name">{{ lastFish.name }}</h3>
-            <h3 class="win-fish-name">{{ lastFish.rarity }}</h3>
-            <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
-        </div>
-    </div>
-
     <div v-if="showVictoryModal" class="overlay" @click="closeVictoryModalAndContinue"></div>
     <div class="victory-modal" v-if="showVictoryModal">
         <div class="victory-content">
