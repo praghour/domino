@@ -21,14 +21,6 @@ const initialFishes = ref([
   { id: 9, img: "/Aquarium/fish9.png", alt: "рыба 9", damage: 30, health: 40, name: 'Рыба9', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 30, ability: "swalala", lvl: 1 }
 ]);
 
-const initialBosses = ref([
-  { id: 1, img: '/Aquarium/boss1.png', name: 'ЗЛАЯ РЫБКА1' },
-  { id: 2, img: '/Aquarium/boss2.png', name: 'ЗЛАЯ РЫБКА2' },
-  { id: 3, img: '/Aquarium/boss3.png', name: 'ЗЛАЯ РЫБКА3' },
-  { id: 4, img: '/Aquarium/boss4.png', name: 'ЗЛАЯ РЫБКА4' },
-  { id: 5, img: '/Aquarium/boss5.png', name: 'ЗЛАЯ РЫБКА5' }
-]);
-
 function loadCollectionFromLocalStorage() {
   const savedCollection = localStorage.getItem('playerFishCollection');
   if (savedCollection) {
@@ -87,7 +79,6 @@ loadPartyIdsFromLocalStorage();
 export default function useFishman() {
   return {
     fishList: initialFishes,
-    bossList: initialBosses,
     party,
     partyIds,
     playerFishCollection,
