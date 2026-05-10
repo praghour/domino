@@ -721,15 +721,13 @@ function goToAquarium() {
     <div v-if="showVictoryModal" class="overlay" @click="closeVictoryModalAndContinue"></div>
     <div class="victory-modal" v-if="showVictoryModal">
         <div class="victory-content">
-            <div class="victory-icon">🏆</div>
-            <h2 class="victory-title">ПОБЕДА!</h2>
+            <h2 class="victory-title">Вы победили!</h2>
             <p class="victory-text">Вы прошли босса уровня {{ bosslvl - 1 }}!</p>
-            <p class="victory-text">Всего побед: {{ totalWins }}</p>
             <div class="victory-reward">
                 <img src="/Aquarium/crystals.png" alt="" class="reward-icon">
                 <span class="reward-amount">+{{ earnedCrystals }}</span>
             </div>
-            <button class="victory-btn" @click="closeVictoryModalAndContinue">Продолжить бой</button>
+            <button class="victory-btn" @click="closeVictoryModalAndContinue">Забрать награду!</button>
         </div>
     </div>
 </div>
@@ -780,7 +778,7 @@ function goToAquarium() {
   padding: 20px;
   justify-content: center;
   align-items: flex-start;
-  min-height: 100vh;
+
 }
 
 .sidebar {
@@ -1411,7 +1409,7 @@ function goToAquarium() {
   height: auto;
   background: #ffffff;
   border-radius: 20px;
-  padding: 30px;
+ 
   color: rgb(0, 0, 0);
   z-index: 1001;
   text-align: center;
@@ -1425,10 +1423,10 @@ function goToAquarium() {
   transform: translate(-50%, -50%);
   width: 400px;
   height: auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   border-radius: 20px;
   padding: 30px;
-  color: white;
+  color: rgb(0, 0, 0);
   z-index: 1001;
   text-align: center;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -1452,21 +1450,22 @@ function goToAquarium() {
 }
 
 .victory-title {
+  color: #000;
   font-size: 32px;
   font-weight: bold;
   margin: 0;
 }
 
 .victory-text {
-  font-size: 16px;
+  font-size: 18px;
   margin: 0;
 }
 
 .victory-reward {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.2);
+  gap: 5px;
+  background: rgba(106, 178, 255, 0.2);
   padding: 10px 20px;
   border-radius: 50px;
 }
@@ -1478,16 +1477,19 @@ function goToAquarium() {
 }
 
 .reward-amount {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
 }
 
 .victory-btn {
-  padding: 10px 30px;
-  background: white;
-  color: #667eea;
+  
+  width: 230px;
+  height: 50px;
+  background: #2D78F5;
+  color: #ffffff;
   border: none;
-  border-radius: 25px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
