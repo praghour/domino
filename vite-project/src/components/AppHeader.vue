@@ -10,10 +10,10 @@
         </RouterLink>
 
         <nav class="nav">
-            <RouterLink to="/">Главная</RouterLink>
-            <RouterLink to="/timer">Фокусировка</RouterLink>
-            <RouterLink to="/achievements">Достижения</RouterLink>
-            <RouterLink to="/Aquarium">Игра</RouterLink>
+            <RouterLink :to="{ name: 'main' }">Главная</RouterLink>
+            <RouterLink :to="{ name: 'timer' }">Фокусировка</RouterLink>
+            <RouterLink :to="{ name: 'achievements' }">Достижения</RouterLink>
+            <RouterLink :to="{ name: 'aquarium' }">Игра</RouterLink>
         </nav>
     </header>
 </template>
