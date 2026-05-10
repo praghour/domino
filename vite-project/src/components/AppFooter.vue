@@ -1,7 +1,7 @@
 <template>
     <footer class="footer">
         <div class="footer_inner">
-            <RouterLink to="/" class="footer_logo">
+            <RouterLink :to="{ name: 'main' }" class="footer_logo">
                 <div class="logo_icon"><img src="/icons/logo.svg" alt="ToDo logo"></div>
                 <h2>ToDo</h2>
             </RouterLink>
@@ -10,10 +10,10 @@
                 <div class="footer_column">
                     <h3>Навигация</h3>
 
-                    <RouterLink to="/">Главная</RouterLink>
-                    <RouterLink to="/timer">Фокусировка</RouterLink>
-                    <RouterLink to="/achievements">Достижения</RouterLink>
-                    <RouterLink to="/aquarium">Игра</RouterLink>
+                    <RouterLink :to="{ name: 'main' }">Главная</RouterLink>
+                    <RouterLink :to="{ name: 'timer' }">Фокусировка</RouterLink>
+                    <RouterLink :to="{ name: 'achievements' }">Достижения</RouterLink>
+                    <RouterLink :to="{ name: 'aquarium' }">Игра</RouterLink>
                 </div>
 
                 <div class="footer_column">
