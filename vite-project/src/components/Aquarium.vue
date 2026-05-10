@@ -54,15 +54,18 @@ const currentFon = computed(() => {
   return aquarium.slidesfon.value.find(f => f.id === aquarium.selectedFonId.value);
 });
 
-// === ГОРИЗОНТАЛЬНЫЙ СЛАЙДЕР (рыбки В АКВАРИУМ для плавания) ===
+// === НОВОЕ: для слайдера рыб с блокировкой используем allFishWithStatus ===
 const currentIndexFish = ref(0);
 
+// МЕНЯЕМ: теперь показываем ВСЕХ рыб с флагом блокировки
 const visibleFishSlides = computed(() => {
-  return aquarium.availableFish.value.slice(currentIndexFish.value, currentIndexFish.value + 3);
+  const fishArray = aquarium.allFishWithStatus?.value || aquarium.availableFish.value;
+  return fishArray.slice(currentIndexFish.value, currentIndexFish.value + 3);
 });
 
 function nextSlideFish() {
-  if (currentIndexFish.value + 3 < aquarium.availableFish.value.length) {
+  const fishArray = aquarium.allFishWithStatus?.value || aquarium.availableFish.value;
+  if (currentIndexFish.value + 3 < fishArray.length) {
     currentIndexFish.value++;
   }
 }
@@ -74,11 +77,25 @@ function prevSlideFish() {
 }
 
 function selectAquariumFish(fish) {
+  // НОВОЕ: проверка на разблокировку
+  if (!fish.isUnlocked && fish.isUnlocked !== undefined) {
+    showNotice('Заблокировано', `Рыба "${fish.name}" ещё не разблокирована! Выбейте её в сундуках или на арене.`);
+    return;
+  }
   aquarium.selectFish(fish);
 }
 
 function isFishInAquarium(fishId) {
   return aquarium.selectedFishIds.value.some(fish => fish.id === fishId);
+}
+
+// НОВОЕ: функция для стилизации карточки рыбы
+function getFishCardClass(fish) {
+  return {
+    'bgfish-btn': true,
+    'active-fish': isFishInAquarium(fish.id),
+    'locked-fish': !fish.isUnlocked && fish.isUnlocked !== undefined
+  };
 }
 
 // === ВЕРТИКАЛЬНЫЙ СЛАЙДЕР (рыбки НА АРЕНУ в отряд) ===
@@ -155,6 +172,7 @@ onMounted(() => {
   const winIds = win.value.map(fish => fish.id);
   aquarium.updateAvailableFish(winIds);
   updateSelectedArenaIds();
+
 });
 
 onUnmounted(() => {
@@ -180,6 +198,10 @@ const onGachaClick = () => {
   
   if (lastFish.value) {
     addOrUpdateFish(lastFish.value);
+    // НОВОЕ: разблокируем полученную рыбу
+    if (aquarium.unlockFish) {
+      aquarium.unlockFish(lastFish.value.id);
+    }
   }
   
   const winIds = win.value.map(fish => fish.id);
@@ -250,18 +272,33 @@ function closeWinModal() {
                 </button>
                 <div class="slides">
                     <div class="slide">
-                        <button 
+                        <!-- ИЗМЕНЕНО: добавляем обертку для замка -->
+                        <div 
                             v-for="(fish) in visibleFishSlides" :key="fish.id" 
-                            class="bgfish-btn"
-                            :class="{ 'active-fish': isFishInAquarium(fish.id) }"
-                            @click="selectAquariumFish(fish)">
-                            <img :src="fish.src" :alt="fish.alt" />
-                        </button>
+                            style="position: relative; width: 72px; height: 64px;">
+                            <button 
+                                :class="getFishCardClass(fish)"
+                                @click="selectAquariumFish(fish)"
+                                :disabled="!fish.isUnlocked && fish.isUnlocked !== undefined">
+                                <div class="fish-card-content">
+                                    <img :src="fish.src" :alt="fish.alt" />
+                                    <!-- НОВОЕ: иконка замка для заблокированных рыб -->
+                                    <div v-if="!fish.isUnlocked && fish.isUnlocked !== undefined" class="fish-locked-overlay">
+                                        <span class="lock-icon">🔒</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button class="control-btn" @click="nextSlideFish()">
                     <img src="/Aquarium/right.png" alt="">
                 </button>
+            </div>
+            
+            <!-- НОВОЕ: подсказка -->
+            <div class="hint-text">
+                <span class="lock-icon-small">🔒</span> - рыба ещё не разблокирована (выбейте в сундуках)
             </div>
         </div>  
 
@@ -554,10 +591,27 @@ body {
   border-radius: 10px;
   border: 2px solid #E5EAF1;
   overflow: hidden;
+  position: relative;
 }
 
 .bgfish-btn.active-fish {
   border: 2px solid #2D78F5;
+}
+
+/* НОВОЕ: стиль для заблокированной рыбы */
+.bgfish-btn.locked-fish {
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.bgfish-btn:disabled {
+  cursor: not-allowed;
+}
+
+.fish-card-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .bgfish-btn img {
@@ -566,6 +620,39 @@ body {
   object-fit: contain;
   border-radius: 8px;
   display: block;
+}
+
+/* НОВОЕ: оверлей с замком */
+.fish-locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-icon {
+  font-size: 24px;
+  color: white;
+  text-shadow: 0 0 3px black;
+}
+
+/* НОВОЕ: подсказка */
+.hint-text {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #67758A;
+  text-align: center;
+}
+
+.lock-icon-small {
+  font-size: 12px;
+  margin-right: 4px;
 }
 
 /* РЕЖИМ ИГРЫ */

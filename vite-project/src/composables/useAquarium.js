@@ -83,7 +83,57 @@ export const allFish = ref([
   { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Рыба9', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
 ]);
 
-// ДОСТУПНЫЕ РЫБЫ (только выбитые)
+// НОВОЕ: массив разблокированных ID рыб - ИЗНАЧАЛЬНО ПУСТОЙ
+const unlockedFishIds = ref([]);
+
+// Загрузка разблокированных рыб из localStorage
+const savedUnlockedFishIds = localStorage.getItem("unlockedFishIds");
+if (savedUnlockedFishIds) {
+  unlockedFishIds.value = JSON.parse(savedUnlockedFishIds);
+}
+
+// НОВОЕ: функция разблокировки рыбы
+function unlockFish(fishId) {
+  if (!unlockedFishIds.value.includes(fishId)) {
+    unlockedFishIds.value.push(fishId);
+    localStorage.setItem("unlockedFishIds", JSON.stringify(unlockedFishIds.value));
+    const fish = allFish.value.find(f => f.id === fishId);
+    if (fish) {
+      showNotice('Новая рыба!', `Вы разблокировали "${fish.name}"! Теперь вы можете добавить её в аквариум.`);
+    }
+    return true;
+  }
+  return false;
+}
+
+// НОВОЕ: массовая разблокировка
+function updateUnlockedFish(fishIds) {
+  let hasNew = false;
+  fishIds.forEach(fishId => {
+    if (!unlockedFishIds.value.includes(fishId)) {
+      unlockedFishIds.value.push(fishId);
+      hasNew = true;
+    }
+  });
+  if (hasNew) {
+    localStorage.setItem("unlockedFishIds", JSON.stringify(unlockedFishIds.value));
+  }
+}
+
+// НОВОЕ: проверка, разблокирована ли рыба
+function isFishUnlocked(fishId) {
+  return unlockedFishIds.value.includes(fishId);
+}
+
+// НОВОЕ: ВСЕ рыбы с флагом блокировки
+const allFishWithStatus = computed(() => {
+  return allFish.value.map(fish => ({
+    ...fish,
+    isUnlocked: unlockedFishIds.value.includes(fish.id)
+  }));
+});
+
+// ДОСТУПНЫЕ РЫБЫ (только для совместимости со старым кодом)
 const availableFishIds = ref([]);
 const availableFish = computed(() => {
   const fishList = allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
@@ -124,10 +174,11 @@ if (savedSelectedFishIds) {
   }));
 }
 
-// Синхронизация availableFishIds с коллекцией игрока
+// Синхронизация availableFishIds с коллекцией игрока - НО НЕ РАЗБЛОКИРУЕМ РЫБ!
 function syncAvailableFishWithCollection() {
   const fishIds = Object.keys(playerFishCollection.value).map(id => Number(id));
   availableFishIds.value = fishIds;
+  // УБРАНО автоматическая разблокировка!!!
 }
 
 watch(playerFishCollection, () => {
@@ -158,17 +209,23 @@ function prevSlideFon() {
   if (currentIndexFon.value > 0) currentIndexFon.value--;
 }
 
-// Функции слайдера рыб
+// Функции слайдера рыб - используем allFishWithStatus
 function nextSlideFish() {
-  if (currentIndexFish.value + 3 < availableFish.value.length) currentIndexFish.value++;
+  if (currentIndexFish.value + 3 < allFishWithStatus.value.length) currentIndexFish.value++;
 }
 
 function prevSlideFish() {
   if (currentIndexFish.value > 0) currentIndexFish.value--;
 }
 
-// Добавление/удаление рыбы в аквариум
+// Добавление/удаление рыбы в аквариум - с проверкой блокировки
 function selectFish(fish) {
+  // Проверка на разблокировку
+  if (!isFishUnlocked(fish.id)) {
+    showNotice('Заблокировано', `Рыба "${fish.name}" ещё не разблокирована! Выбейте её в сундуках или на арене.`);
+    return;
+  }
+  
   const index = selectedFishIds.value.findIndex(f => f.id === fish.id);
   if (index === -1) {
     selectedFishIds.value.push({
@@ -255,6 +312,10 @@ export default function useAquarium() {
     getFishStyle,
     startAnimation,
     stopAnimation,
-    updateAvailableFish
+    updateAvailableFish,
+    allFishWithStatus,
+    unlockFish,
+    isFishUnlocked,
+    updateUnlockedFish
   };
 }

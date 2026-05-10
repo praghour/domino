@@ -5,7 +5,7 @@ import useFishman from '../composables/Arena';
 import useAquarium from '../composables/useAquarium.js';
 import useGacha from '../composables/useGacha.js';
 import useMoney from '../composables/useMoney.js';
-
+import useNotice from '../composables/useNotice.js';
 const possibleBosses = ref([
   { id: 1, img: '/Aquarium/boss1.png', name: 'ЗЛАЯ РЫБКА1' },
   { id: 2, img: '/Aquarium/boss2.png', name: 'ЗЛАЯ РЫБКА2' },
@@ -31,7 +31,8 @@ watch(win, (newWin) => {
   aquarium.updateAvailableFish(winIds);
 }, { deep: true, immediate: true });
 
-const { findCurrency } = useMoney();
+const { findCurrency, addCurrency, spendCurrency } = useMoney();
+const { showNotice } = useNotice();
 
 const userMoney = computed(() => {
   const money = findCurrency('money');
@@ -42,6 +43,51 @@ const userCrystals = computed(() => {
   const crystal = findCurrency('crystal');
   return crystal ? crystal.count : 0;
 });
+
+// ПЕРЕМЕННЫЕ ДЛЯ СТАТИСТИКИ
+const totalWins = ref(0);      // Победы (прохождение боссов кратных 5)
+const totalLosses = ref(0);    // Поражения (смерть рыбок)
+
+// Загрузка статистики
+const loadStats = () => {
+  const savedWins = localStorage.getItem('arena_totalWins');
+  const savedLosses = localStorage.getItem('arena_totalLosses');
+  if (savedWins) totalWins.value = parseInt(savedWins);
+  if (savedLosses) totalLosses.value = parseInt(savedLosses);
+};
+
+// Сохранение статистики
+const saveStats = () => {
+  localStorage.setItem('arena_totalWins', totalWins.value);
+  localStorage.setItem('arena_totalLosses', totalLosses.value);
+};
+
+// ЗАГРУЗКА СОХРАНЕННОГО ПРОГРЕССА БОССА
+const loadProgress = () => {
+  const savedBossLevel = localStorage.getItem('arena_bossLevel');
+  const savedMaxBossHealth = localStorage.getItem('arena_maxBossHealth');
+  const savedBossDamage = localStorage.getItem('arena_bossDamage');
+  const savedBossDefeatedCount = localStorage.getItem('arena_bossDefeatedCount');
+  const savedCurrentBoss = localStorage.getItem('arena_currentBoss');
+  
+  if (savedBossLevel) bosslvl.value = parseInt(savedBossLevel);
+  if (savedMaxBossHealth) {
+    maxBossHealth.value = parseInt(savedMaxBossHealth);
+    bossHealth.value = maxBossHealth.value;
+  }
+  if (savedBossDamage) bossDamage.value = parseInt(savedBossDamage);
+  if (savedBossDefeatedCount) bossDefeatedCount.value = parseInt(savedBossDefeatedCount);
+  if (savedCurrentBoss) currentBoss.value = JSON.parse(savedCurrentBoss);
+};
+
+// СОХРАНЕНИЕ ПРОГРЕССА БОССА
+const saveProgress = () => {
+  localStorage.setItem('arena_bossLevel', bosslvl.value);
+  localStorage.setItem('arena_maxBossHealth', maxBossHealth.value);
+  localStorage.setItem('arena_bossDamage', bossDamage.value);
+  localStorage.setItem('arena_bossDefeatedCount', bossDefeatedCount.value);
+  localStorage.setItem('arena_currentBoss', JSON.stringify(currentBoss.value));
+};
 
 const bossHealth = ref(100);
 const bossDamage = ref(2);
@@ -187,14 +233,40 @@ function startFight() {
   if (isFighting.value) return;
   
   updateTeamHP();
-  bossHealth.value = 100;
-  bossDamage.value = 2;
-  maxBossHealth.value = 100;
-  bosslvl.value = 1;
-  bossDefeatedCount.value = 0;
-  currentBoss.value = { ...possibleBosses.value[0] };
+  
+  // Если нет сохраненного прогресса, инициализируем начальные значения
+  if (!localStorage.getItem('arena_bossLevel')) {
+    bossHealth.value = 100;
+    bossDamage.value = 2;
+    maxBossHealth.value = 100;
+    bosslvl.value = 1;
+    bossDefeatedCount.value = 0;
+    currentBoss.value = { ...possibleBosses.value[0] };
+  } else {
+    // При рестарте босс восстанавливает полное здоровье
+    bossHealth.value = maxBossHealth.value;
+  }
+  
   isFighting.value = true;
   fight();
+}
+
+// ФУНКЦИЯ ВЫХОДА ИЗ БОЯ (без паузы)
+function exitBattle() {
+  if (isFighting.value) {
+    stopFight();
+    
+    // Восстанавливаем здоровье рыб до начального
+    for (const fish of party.value) {
+      const originalFish = fishList.value.find(f => f.id === fish.id);
+      if (originalFish) {
+        fish.health = originalFish.health;
+      }
+    }
+    updateTeamHP();
+    
+    showNotice('Выход', 'Вы вышли из боя. Прогресс босса сохранен.');
+  }
 }
 
 function fight() {
@@ -233,29 +305,40 @@ function fight() {
     
     bossHealth.value = Math.max(0, bossHealth.value - totalFishDmg - totalabilitydmg);
     
+    // СОХРАНЯЕМ ПРОГРЕСС ПОСЛЕ КАЖДОГО ТИКА
+    saveProgress();
+    
     if (bossHealth.value <= 0) {
       bossDefeatedCount.value++;
+      bosslvl.value++;
       
-      if (bossDefeatedCount.value >= 5) {
-        stopFight();
-        isFighting.value = false;
-        earnedCrystals.value = 1;
-        const crystal = findCurrency('crystal');
-        if (crystal) {
-          crystal.count += 1;
-        }
+      // ПРОВЕРКА: если уровень босса кратен 5 -> победа и награда
+      const isMilestoneWin = (bosslvl.value - 1) % 5 === 0;
+      
+      if (isMilestoneWin) {
+        totalWins.value++;
+        saveStats();
+        
+        // Награда за победу (кристаллы)
+        const crystalsReward = Math.floor(bosslvl.value / 5) * 5;
+        addCurrency('crystal', crystalsReward);
+        earnedCrystals.value = crystalsReward;
+        
+        // ПОКАЗЫВАЕМ МОДАЛКУ С НАГРАДОЙ
         showVictoryModal.value = true;
-        return;
       }
       
+      // НОВЫЙ БОСС (продолжаем бой)
       const newBoss = getRandomBoss();
       currentBoss.value = newBoss;
       maxBossHealth.value += 25;
       bossHealth.value = maxBossHealth.value;  
       bossDamage.value = bossDamage.value + 2;
-      bosslvl.value = bosslvl.value + 1;
       
-      console.log(`Новый босс: ${newBoss.name}! HP: ${maxBossHealth.value}, Урон: ${bossDamage.value}`);
+      // Сохраняем прогресс после смены босса
+      saveProgress();
+      
+      console.log(`Новый босс: ${newBoss.name}! Уровень: ${bosslvl.value}, HP: ${maxBossHealth.value}, Урон: ${bossDamage.value}`);
       return;
     }
     
@@ -283,14 +366,26 @@ function fight() {
         triggerBossAttack();
         addFloatingBossDamage(damageToTeam);
       }
-      
+      // После нанесения урона
+for (const fish of party.value) {
+  if (fish.health < 0) fish.health = 0;
+}
       teamHP.value = Math.max(0, newTeamHP);
     }
     
     if (teamHP.value <= 0) {
+        for (const fish of party.value) {
+    fish.health = 0;
+  }
       console.log('Команда побеждена!');
+      // ПОРАЖЕНИЕ
+      totalLosses.value++;
+      saveStats();
+      
       isFighting.value = false;
       stopFight();
+      // Сохраняем прогресс после поражения
+      saveProgress();
     }
     
   }, 1000);
@@ -307,6 +402,7 @@ function stopFight() {
 function restartFight() {
   stopFight();
   
+  // Восстанавливаем здоровье рыб
   for (const fish of party.value) {
     const originalFish = fishList.value.find(f => f.id === fish.id);
     if (originalFish) {
@@ -315,19 +411,16 @@ function restartFight() {
   }
   
   updateTeamHP();
-  bossHealth.value = 100;
-  bossDamage.value = 2;
-  maxBossHealth.value = 100;
-  bosslvl.value = 1;
-  bossDefeatedCount.value = 0;
-  currentBoss.value = { ...possibleBosses.value[0] };
+  
+  // Босс восстанавливает полное здоровье
+  bossHealth.value = maxBossHealth.value;
+  saveProgress();
+  
   startFight();
 }
 
-function closeVictoryModalAndRestart() {
+function closeVictoryModalAndContinue() {
   showVictoryModal.value = false;
-  bossDefeatedCount.value = 0;
-  restartFight();
 }
 
 const currentFon = computed(() => {
@@ -408,14 +501,32 @@ onMounted(() => {
   
   updateSelectedArenaIds();
   updateTeamHP();
+  
+  loadProgress();
+  loadStats();
 });
 
 onBeforeUnmount(() => {
   stopFight();
   aquarium.stopAnimation();
+  saveProgress();
 });
 
 const onGachaClick = () => {
+  const money = findCurrency('money');
+  
+  if (!money || money.count < 10) {
+    showNotice('Ошибка', 'Недостаточно монет! Нужно 10 монет для открытия сундука.');
+    return;
+  }
+  
+  const success = spendCurrency('money', 10);
+  
+  if (!success) {
+    showNotice('Ошибка', 'Не удалось списать монеты. Попробуйте снова.');
+    return;
+  }
+  
   gacha();
   
   if (lastFish.value) {
@@ -491,6 +602,14 @@ function goToAquarium() {
         <div style="position: relative; width: 935px; height: 550px;">
             <img :src="currentFon.src" alt="фон арены" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
             
+            <!-- СТАТИСТИКА НА ЭКРАНЕ -->
+            <div class="stats-panel">
+                <div class="stat-item">🏆 Побед: {{ totalWins }}</div>
+                <div class="stat-item">💀 Поражений: {{ totalLosses }}</div>
+                <!-- КНОПКА ВЫХОДА ИЗ БОЯ -->
+                <button v-if="isFighting" class="exit-battle-btn" @click="exitBattle">🚪 Выйти</button>
+            </div>
+            
             <div class="boss-image">
                 <div class="boss-card" :class="{ 'boss-hit': isBossHit, 'boss-attacking': isBossAttacking }">
                     <img :src="currentBoss.img" width="120px" :alt="currentBoss.name">
@@ -501,14 +620,14 @@ function goToAquarium() {
             </div>   
             
            <div class="team-fish-left">
-    <div v-for="fish in party" :key="fish.id" class="arena-fish-card" 
-        :class="{ 'fish-attack': attackingFish.includes(fish.id), 'fish-heal': healingFish.includes(fish.id) }">
-        <img :src="fish.img" width="45px" :alt="fish.name">
-        <div v-for="heal in floatingHeals.filter(h => h.fishId === fish.id)" :key="heal.id" class="floating-heal" :style="{ left: heal.x + 'px', top: heal.y + 'px' }">
-            +{{ heal.value }}
-        </div>
-    </div>
-</div>
+                <div v-for="fish in party" :key="fish.id" class="arena-fish-card" 
+                    :class="{ 'fish-attack': attackingFish.includes(fish.id), 'fish-heal': healingFish.includes(fish.id) }">
+                    <img :src="fish.img" width="45px" :alt="fish.name" :style="fish.health <= 0 ? 'transform: rotate(180deg); filter: grayscale(100%); opacity: 0.6;' : ''">
+                    <div v-for="heal in floatingHeals.filter(h => h.fishId === fish.id)" :key="heal.id" class="floating-heal" :style="{ left: heal.x + 'px', top: heal.y + 'px' }">
+                        +{{ heal.value }}
+                    </div>
+                </div>
+            </div>
             <div v-for="bossDamage in floatingBossDamages" :key="bossDamage.id" class="floating-boss-damage" :style="{ left: bossDamage.x + 'px', top: bossDamage.y + 'px' }">
                 -{{ bossDamage.value }}
             </div>
@@ -540,7 +659,7 @@ function goToAquarium() {
                 </div>
             </div>
 
-            <div v-if="!isFighting && party.length > 0" class="start-battle">
+            <div v-if="!isFighting && party.length > 0 && teamHP > 0" class="start-battle">
                 <p>Начать игру?</p>
                 <button class="start-battle-btn" @click="startFight">В БОЙ!</button>
             </div>
@@ -565,7 +684,7 @@ function goToAquarium() {
         </div>
         <div class="balance-gacha">
             <p>Ваш баланс</p>
-            <p class="balance-item">10<img src="/Aquarium/money.png" alt=""></p>
+            <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
         </div>
         <div class="select-chest">
             <p class="ppp">Выберите сундук</p>
@@ -602,23 +721,65 @@ function goToAquarium() {
         </div>
     </div>
 
-    <div v-if="showVictoryModal" class="overlay" @click="showVictoryModal = false"></div>
+    <div v-if="showVictoryModal" class="overlay" @click="closeVictoryModalAndContinue"></div>
     <div class="victory-modal" v-if="showVictoryModal">
         <div class="victory-content">
             <div class="victory-icon">🏆</div>
             <h2 class="victory-title">ПОБЕДА!</h2>
-            <p class="victory-text">Вы победили 5 боссов подряд!</p>
+            <p class="victory-text">Вы прошли босса уровня {{ bosslvl - 1 }}!</p>
+            <p class="victory-text">Всего побед: {{ totalWins }}</p>
             <div class="victory-reward">
                 <img src="/Aquarium/crystals.png" alt="" class="reward-icon">
                 <span class="reward-amount">+{{ earnedCrystals }}</span>
             </div>
-            <button class="victory-btn" @click="closeVictoryModalAndRestart">Продолжить</button>
+            <button class="victory-btn" @click="closeVictoryModalAndContinue">Продолжить бой</button>
         </div>
     </div>
 </div>
 </template>
 
 <style scoped>
+/* СТИЛИ */
+.stats-panel {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  gap: 20px;
+  z-index: 20;
+  backdrop-filter: blur(5px);
+  align-items: center;
+}
+
+.stat-item {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'FRM3216x16', monospace;
+}
+
+.exit-battle-btn {
+  background: rgba(255, 100, 100, 0.8);
+  border: none;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.exit-battle-btn:hover {
+  background: rgba(255, 50, 50, 1);
+  transform: scale(1.05);
+}
+
+/* остальные стили такие же как в твоем оригинале */
 * {
   margin: 0;
   padding: 0;
@@ -948,7 +1109,7 @@ function goToAquarium() {
 .arena-team {
   position: absolute;
   left: 20px;
-  top: 20px;
+  top: 60px;
   padding: 1px;
   border-radius: 12px;
   color: white;
@@ -997,7 +1158,7 @@ function goToAquarium() {
 .arena-boss {
   position: absolute;
   right: 20px;
-  top: 20px;
+  top: 60px;
   padding: 1px;
   border-radius: 12px;
   color: white;
