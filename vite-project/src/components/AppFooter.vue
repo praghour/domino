@@ -10,10 +10,10 @@
                 <div class="footer_column">
                     <h3>Навигация</h3>
 
-                    <RouterLink to="/">Главная</RouterLink>
-                    <RouterLink to="/timer">Фокусировка</RouterLink>
-                    <RouterLink to="/achievements">Достижения</RouterLink>
-                    <RouterLink to="/aquarium">Игра</RouterLink>
+                    <RouterLink :to="{ name: 'main' }">Главная</RouterLink>
+                    <RouterLink :to="{ name: 'timer' }">Фокусировка</RouterLink>
+                    <RouterLink :to="{ name: 'achievements' }">Достижения</RouterLink>
+                    <RouterLink :to="{ name: 'aquarium' }">Игра</RouterLink>
                 </div>
 
                 <div class="footer_column">
