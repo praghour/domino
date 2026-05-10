@@ -408,6 +408,10 @@ body {
   gap: 10px;
 }
 
+.balance-values p {
+    font-family: 'FRM3216x16', 'FRM325x8', monospace;
+}
+
 .balance-item {
   display: flex;
   align-items: center;
@@ -416,6 +420,7 @@ body {
   font-size: 16px;
   color: #1A1A1A;
   margin: 0;
+  
 }
 
 .balance-item img {
