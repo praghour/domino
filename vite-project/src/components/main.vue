@@ -15,8 +15,8 @@ const selectedTask = ref(null);
 const router = useRouter();
 
 const { showNotice } = useNotice();
-const { tasks, deleteTask, editTask, saveTasksToStorage } = useTask();
-const { findCurrency } = useMoney();
+const { tasks, deleteTask, editTask, saveTasksToStorage, getTodayDate } = useTask();
+const { findCurrency, addCurrency } = useMoney();
 
 const { addStat } = useAchieve();
   
@@ -59,13 +59,13 @@ const activeTasks = computed(() => {
 // задачи на сегодня
 const todayTasks = computed(() => {
     const result = [];
+    const today = getTodayDate();
 
     for (let i = 0; i < tasks.value.length; i++) {
-        if (tasks.value[i].isArchive !== true && result.length < 3) {
+        if (tasks.value[i].isArchive !== true && tasks.value[i].deadline === today && result.length < 3) {
             result.push(tasks.value[i]);
         };
     };
-
     return result;
 });
 
@@ -77,13 +77,25 @@ function changeFilter(filter) {
 // отметка о выполнении задачи
 function completeTask(task) {
     task.isDone = !task.isDone;
-    saveTasksToStorage();
-
     if (task.isDone) {
-        showNotice('Задача выполнена', 'Задача отмечена как завершённая');
+        const reward = getTaskReward(task);
+        addCurrency('money', reward);
+        showNotice('Задача выполнена', 'Получено монет: ' + reward);
     } else {
         showNotice('Задача активна', 'Задача снова вернулась в список');
     };
+    saveTasksToStorage();
+};
+
+// определение награды за задачу
+function getTaskReward(task) {
+    if (task.priority === 'Высокий') {
+        return 3;
+    };
+    if (task.priority === 'Средний') {
+        return 2;
+    };
+    return 1;
 };
 
 // архивирование задачи
@@ -207,7 +219,7 @@ function openAchievements() {
                 <h3>Сегодня</h3>
                 <div v-for="task in todayTasks" class="today_task">
                     <span class="today_circle"></span>
-                    <div>
+                    <div v-if="task.isDone === false">
                         <p>{{ task.name }}</p>
                         <small>
                             <span class="priority_dot" :class="{ high_dot: task.priority === 'Высокий', medium_dot: task.priority === 'Средний', low_dot: task.priority === 'Низкий' }"></span>

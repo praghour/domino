@@ -143,7 +143,7 @@ function saveEditedTask(editedTask) {
                 <span class="done_label" v-if="task.isDone">✓ Выполнено</span>
                 <span class="date_label">
                     <img src="/icons/calendar.svg" alt="">
-                    {{ task.date }}
+                    {{ task.deadline || task.date }}
                 </span>
             </div>
 
@@ -151,12 +151,13 @@ function saveEditedTask(editedTask) {
 
             <div class="subtasks_block">
                 <h3>Подзадачи</h3>
-                <div v-for="subtask in subtasks" class="subtask_item">
+                <div v-for="subtask in subtasks" v-if="subtasks.length !== 0" class="subtask_item">
                     <button class="checkbox" :class="{ checked: subtask.isDone }" @click="completeSubtask(subtask)">
                         <span v-if="subtask.isDone">✓</span>
                     </button>
                     <p :class="{ done: subtask.isDone }">{{ subtask.name }}</p>
                 </div>
+                <div v-else class="info_item"><p>Позадач пока нет, вы можете добавить их при редактировании задачи</p></div>
             </div>
 
             <button class="done_button" :class="{ cancel_done_button: task.isDone }" @click="completeTask">
@@ -177,7 +178,7 @@ function saveEditedTask(editedTask) {
                     <img src="/icons/calendar.svg" alt="">
                     <div>
                         <b>Создано</b>
-                        <p>{{ task.date }}</p>
+                        <p>{{ task.createdDate || task.date }}</p>
                     </div>
                 </div>
                 <div class="info_item">

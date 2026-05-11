@@ -96,56 +96,41 @@ function createTask() {
         <form class="modal" @submit.prevent="createTask">
             <div class="modal_header">
                 <h2>Новая задача</h2>
-
-                <button type="button" class="close_button" @click="closeModal">
-                    ×
-                </button>
+                <button type="button" class="close_button" @click="closeModal">×</button>
             </div>
 
             <div class="form_group">
                 <label>Название</label>
-
                 <input v-model="form.name" type="text" placeholder="Введите название задачи">
-
-                <p v-if="errors.name" class="error">
-                    {{ errors.name }}
-                </p>
+                <p v-if="errors.name" class="error">{{ errors.name }}</p>
             </div>
 
             <div class="form_group">
                 <label>Описание</label>
-
                 <textarea v-model="form.description" placeholder="Введите описание задачи"></textarea>
             </div>
 
             <div class="form_group">
                 <label>Подзадачи</label>
-
                 <div class="subtasks">
                     <input v-for="(subtask, index) in form.subtasks" v-model="form.subtasks[index]" type="text" placeholder="Введите подзадачу">
                 </div>
             </div>
 
             <div class="form_group">
-                <label>Дата</label>
-
+                <label>Дедлайн</label>
                 <input v-model="form.date" type="date" :min="getTodayDate()">
-
-                <p v-if="errors.date" class="error">
-                    {{ errors.date }}
-                </p>
+                <p v-if="errors.date" class="error">{{ errors.date }}</p>
             </div>
 
             <div class="form_group">
                 <label>Приоритет</label>
-
                 <div class="priority_buttons">
                     <button
                         type="button"
                         class="priority_button low"
                         :class="{ selected: form.priority === 'Низкий' }"
-                        @click="choosePriority('Низкий')"
-                    >
+                        @click="choosePriority('Низкий')">
                         <span></span>
                         Низкий
                     </button>
@@ -154,8 +139,7 @@ function createTask() {
                         type="button"
                         class="priority_button medium"
                         :class="{ selected: form.priority === 'Средний' }"
-                        @click="choosePriority('Средний')"
-                    >
+                        @click="choosePriority('Средний')">
                         <span></span>
                         Средний
                     </button>
@@ -164,23 +148,19 @@ function createTask() {
                         type="button"
                         class="priority_button high"
                         :class="{ selected: form.priority === 'Высокий' }"
-                        @click="choosePriority('Высокий')"
-                    >
+                        @click="choosePriority('Высокий')">
                         <span></span>
                         Высокий
                     </button>
                 </div>
 
-                <p v-if="errors.priority" class="error">
-                    {{ errors.priority }}
-                </p>
+                <p v-if="errors.priority" class="error">{{ errors.priority }}</p>
             </div>
 
             <div class="modal_actions">
                 <button type="button" class="cancel_button" @click="closeModal">
                     Отмена
                 </button>
-
                 <button type="submit" class="create_button">
                     Создать
                 </button>
