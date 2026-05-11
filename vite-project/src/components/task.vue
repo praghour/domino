@@ -19,35 +19,36 @@ const task = computed(() => {
     return findTask(taskId);
 });
 
+// отслеживание выполнения подзадач
 const doneSubtasks = computed(() => {
     let count = 0;
-
-    if (!task.value || !task.value.subtasks) {
-        return count;
-    };
-    for (let i = 0; i < task.value.subtasks.length; i++) {
-        if (task.value.subtasks[i].isDone === true) {
+    for (let i = 0; i < subtasks.value.length; i++) {
+        if (subtasks.value[i].isDone === true) {
             count++;
         };
     };
-
     return count;
 });
 
+// отслеживание активных подзадач
 const activeSubtasks = computed(() => {
-    if (!task.value || !task.value.subtasks) {
-        return 0;
-    };
-
-    return task.value.subtasks.length - doneSubtasks.value;
+    return subtasks.value.length - doneSubtasks.value;
 });
 
+// отслеживание наличия подзадач
+const subtasks = computed(() => {
+    if (!task.value || !task.value.subtasks) {
+        return [];
+    };
+    return task.value.subtasks;
+});
+
+// прогресс
 const progressPercent = computed(() => {
-    if (!task.value || !task.value.subtasks || task.value.subtasks.length === 0) {
+    if (subtasks.value.length === 0) {
         return 0;
     };
-
-    return Math.round(doneSubtasks.value / task.value.subtasks.length * 100);
+    return Math.round(doneSubtasks.value / subtasks.value.length * 100);
 });
 
 const circleStyle = computed(() => {
@@ -83,6 +84,7 @@ function removeTask() {
     router.push({name: 'main'});
 };
 
+// модалка редактирования
 function openEditModal() {
     isEditModalOpen.value = true;
 };
@@ -115,7 +117,7 @@ function saveEditedTask(editedTask) {
 
             <div class="subtasks_block">
                 <h3>Подзадачи</h3>
-                <div v-for="subtask in task.subtasks" class="subtask_item">
+                <div v-for="subtask in subtasks" class="subtask_item">
                     <button class="checkbox" :class="{ checked: subtask.isDone }" @click="completeSubtask(subtask)">
                         <span v-if="subtask.isDone">✓</span>
                     </button>
@@ -126,7 +128,7 @@ function saveEditedTask(editedTask) {
             <button class="done_button" @click="completeTask">Сделано</button>
 
             <div class="subtasks_info">
-                <p>Всего подзадач: {{ task.subtasks.length }}</p>
+                <p>Всего подзадач: {{ subtasks.length }}</p>
                 <p>Активных подзадач: {{ activeSubtasks }}</p>
             </div>
         </section>
@@ -164,7 +166,7 @@ function saveEditedTask(editedTask) {
                         <div class="progress_inner">{{ progressPercent }}%</div>
                     </div>
                     <div class="progress_text">
-                        <b>{{ doneSubtasks }} из {{ task.subtasks.length }}</b>
+                        <b>{{ doneSubtasks }} из {{ subtasks.length }}</b>
                         <span>выполнено</span>
                     </div>
                 </div>

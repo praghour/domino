@@ -359,7 +359,7 @@ button {
 .task_name {
   flex: 1;
   margin: 0;
-
+  cursor: pointer;
   color: #0d1627;
   font-size: 14px;
   text-align: left;
