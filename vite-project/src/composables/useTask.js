@@ -120,7 +120,23 @@ function loadTasksFromStorage() {
     };
 };
 
+// проверка просроченных задач
+function checkExpiredTasks() {
+    const today = getTodayDate();
+
+    for (let i = 0; i < taskList.length; i++) {
+        if (taskList[i].deadline && taskList[i].deadline < today && taskList[i].isDone !== true) {
+            taskList[i].isExpired = true;
+        } else {
+            taskList[i].isExpired = false;
+        };
+    };
+
+    saveTasksToStorage();
+};
+
 loadTasksFromStorage();
+checkExpiredTasks();
 
 const tasks = computed(() => taskList);
 
@@ -228,6 +244,6 @@ function prepareTaskData(form) {
 export default function useTask() {
     return {
         tasks,
-        addTask, findTask, deleteTask, editTask, getTodayDate, saveTasksToStorage, loadTasksFromStorage, getCleanSubtasks, prepareTaskData
+        addTask, findTask, deleteTask, editTask, getTodayDate, saveTasksToStorage, loadTasksFromStorage, checkExpiredTasks, getCleanSubtasks, prepareTaskData
     };
 };

@@ -219,7 +219,7 @@ function openAchievements() {
                 <h3>Сегодня</h3>
                 <div v-for="task in todayTasks" class="today_task">
                     <span class="today_circle"></span>
-                    <div>
+                    <div v-if="task.isDone === false">
                         <p>{{ task.name }}</p>
                         <small>
                             <span class="priority_dot" :class="{ high_dot: task.priority === 'Высокий', medium_dot: task.priority === 'Средний', low_dot: task.priority === 'Низкий' }"></span>
