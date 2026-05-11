@@ -62,11 +62,10 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
 
 <style scoped>
 .achievements_page {
+    width: min(100% - 80px, 1362px);
     min-height: 100vh;
-    max-width: 1200px;
 
     margin: 0 auto;
-    padding: 20px;
 
     background: #f8fafc;
     font-family: 'Jost', Arial, sans-serif;
@@ -75,6 +74,10 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
     display: grid;
     grid-template-columns: minmax(0, 1fr) 220px;
     gap: 30px;
+}
+
+.achievements_content {
+    min-width: 0;
 }
 
 .page_title {
@@ -97,18 +100,20 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
 
 .achievements_grid {
     display: grid;
-    grid-template-columns: repeat(3, 260px);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 260px));
     gap: 20px;
 }
 
 .achievements_sidebar {
+    width: 220px;
+
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
 .side_card {
-    width: 220px;
+    width: 100%;
 
     padding: 20px;
 
@@ -128,6 +133,7 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 
     margin-bottom: 18px;
 
@@ -141,5 +147,6 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
 
 .side_row strong {
     color: #0d1627;
+    white-space: nowrap;
 }
 </style>

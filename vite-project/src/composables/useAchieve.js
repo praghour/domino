@@ -1,7 +1,9 @@
 import { computed, reactive } from 'vue';
 import useTask from './useTask';
+import useMoney from './useMoney';
 
 const { tasks } = useTask();
+const { findTotalEarned } = useMoney();
 
 let savedStats = localStorage.getItem('stats');
 
@@ -20,6 +22,51 @@ const stats = reactive({
     wins: savedStats.wins || 0,
     losses: savedStats.losses || 0
 });
+
+// сохранение статистики
+function saveStatsToStorage() {
+    localStorage.setItem('stats', JSON.stringify(stats));
+};
+
+// обновление статистики из хранилища
+function updateStatsFromStorage() {
+    const money = findTotalEarned('money');
+
+    if (money) {
+        stats.coins = money.total;
+    };
+
+    const crystal = findTotalEarned('crystal');
+
+    if (crystal) {
+        stats.crystals = crystal.total;
+    };
+
+    const savedWins = localStorage.getItem('arena_totalWins');
+
+    if (savedWins) {
+        stats.wins = Number(savedWins);
+    };
+
+    const savedLosses = localStorage.getItem('arena_totalLosses');
+
+    if (savedLosses) {
+        stats.losses = Number(savedLosses);
+    };
+
+    saveStatsToStorage();
+};
+
+// увеличение статистики
+function addStat(statName) {
+    if (stats[statName] === undefined) {
+        return;
+    };
+
+    stats[statName] = stats[statName] + 1;
+
+    saveStatsToStorage();
+};
 
 // выполненные задачи
 const completedTasks = computed(() => {
@@ -122,11 +169,16 @@ function countByCategory(category) {
 };
 
 // экспорт всего и вся
+updateStatsFromStorage();
+
 export default function useAchieve() {
     return {
         stats,
         achievements,
         receivedAchievements,
-        countByCategory
+        countByCategory,
+        addStat,
+        saveStatsToStorage,
+        updateStatsFromStorage
     };
 };

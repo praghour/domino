@@ -43,14 +43,20 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 
 <style scoped>
 .timer_page {
+  width: min(100% - 80px, 1362px);
+  margin: 0 auto;
+
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 2fr) 310px;
   gap: 30px;
-  padding: 20px;
+
+  background: #f8fafc;
 }
 
 .timer_check,
 .timer_set {
+  min-width: 0;
+
   background: white;
   border: 1px solid #dfe6ef;
   border-radius: 18px;
@@ -76,12 +82,14 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 
 .timer_check h2 {
   margin: 0;
+
   color: #111827;
   font-size: 26px;
 }
 
 .timer_check p {
   margin: 8px 0 0;
+
   color: #64748b;
   font-size: 14px;
 }
@@ -89,7 +97,9 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 .timer {
   width: 270px;
   height: 270px;
+
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,11 +109,14 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 .timer_inner {
   width: 230px;
   height: 230px;
+
   background: white;
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   color: #111827;
   font-size: 52px;
   font-weight: 700;
@@ -125,11 +138,15 @@ startTimer, pauseTimer, resetTimer, setMinutes, minusMinute, plusMinute } = useT
 button {
   border: none;
   border-radius: 10px;
+
   background: #edf1f7;
   color: #64748b;
+
   padding: 14px 22px;
+
   font-size: 16px;
   font-weight: 600;
+
   cursor: pointer;
 }
 
@@ -150,6 +167,7 @@ button {
 
 .set_title {
   margin: 0 0 18px;
+
   color: #111827;
   font-size: 16px;
   font-weight: 700;
@@ -158,12 +176,15 @@ button {
 .time_control {
   border: 2px solid #dfe6ef;
   border-radius: 12px;
+
   padding: 8px;
+
   justify-content: space-between;
 }
 
 .time_control button {
   padding: 10px 16px;
+
   color: #3478f6;
 }
 
@@ -180,10 +201,14 @@ button {
 
 .time_buttons {
   margin-top: 18px;
+
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .time_buttons button {
-  flex: 1;
+  width: 100%;
+
   padding: 12px;
   font-size: 14px;
 }
