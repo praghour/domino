@@ -134,27 +134,18 @@ function addTask(newTask) {
         };
     };
 
-    const subtasksList = [];
-
-    for (let i = 0; i < newTask.subtasks.length; i++) {
-        const currentSubtask = newTask.subtasks[i].trim();
-
-        if (currentSubtask !== '') {
-            subtasksList.push(currentSubtask);
-        };
-    };
-
     const newTaskId = maxId + 1;
+    const taskData = prepareTaskData(newTask);
 
     taskList.push({
         id: newTaskId,
-        name: newTask.name.trim(),
-        description: newTask.description.trim(),
-        subtasks: subtasksList,
+        name: taskData.name,
+        description: taskData.description,
+        subtasks: taskData.subtasks,
         createdDate: getTodayDate(),
         updatedDate: getTodayDate(),
-        deadline: newTask.date,
-        priority: newTask.priority,
+        deadline: taskData.date,
+        priority: taskData.priority,
         isDone: false,
         isArchive: false,
         isExpired: false
