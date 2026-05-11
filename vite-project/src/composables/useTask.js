@@ -129,26 +129,17 @@ function deleteTask(taskId) {
 // изменение задачи
 function editTask(taskId, editTaskData) {
     const editingTask = taskList.find((task) => task.id === taskId);
-
     if (!editingTask) {
         return;
     };
 
-    const subtasksList = [];
+    const taskData = prepareTaskData(editTaskData);
 
-    for (let i = 0; i < editTaskData.subtasks.length; i++) {
-        const currentSubtask = editTaskData.subtasks[i].trim();
-
-        if (currentSubtask !== '') {
-            subtasksList.push(currentSubtask);
-        };
-    };
-
-    editingTask.name = editTaskData.name.trim();
-    editingTask.description = editTaskData.description.trim();
-    editingTask.subtasks = subtasksList;
-    editingTask.date = editTaskData.date;
-    editingTask.priority = editTaskData.priority;
+    editingTask.name = taskData.name;
+    editingTask.description = taskData.description;
+    editingTask.subtasks = taskData.subtasks;
+    editingTask.date = taskData.date;
+    editingTask.priority = taskData.priority;
 
     saveTasksToStorage();
 };
