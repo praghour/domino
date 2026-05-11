@@ -3,7 +3,7 @@ import { watch, onMounted, onUnmounted } from 'vue';
 import AchievementCard from './AchievementCard.vue';
 import useAchieve from '../composables/useAchieve';
 
-const { achievements, receivedAchievements, countByCategory, updateStatsFromStorage } = useAchieve();
+const { achievements, receivedAchievements, countByCategory, receivedByCategory, updateStatsFromStorage } = useAchieve();
 
 let interval = null;
 
@@ -54,27 +54,27 @@ watch(achievements, () => {
 
                 <div class="side_row">
                     <span>Монетки</span>
-                    <strong>{{ countByCategory('Монетки') }}</strong>
+                    <strong>{{ receivedByCategory('Монетки') }} из {{ countByCategory('Монетки') }}</strong>
                 </div>
 
                 <div class="side_row">
                     <span>Кристаллы</span>
-                    <strong>{{ countByCategory('Кристаллы') }}</strong>
+                    <strong>{{ receivedByCategory('Кристаллы') }} из {{ countByCategory('Кристаллы') }}</strong>
                 </div>
 
                 <div class="side_row">
                     <span>Задачи</span>
-                    <strong>{{ countByCategory('Задачи') }}</strong>
+                    <strong>{{ receivedByCategory('Задачи') }} из {{ countByCategory('Задачи') }}</strong>
                 </div>
 
                 <div class="side_row">
                     <span>Победы</span>
-                    <strong>{{ countByCategory('Победы') }}</strong>
+                    <strong>{{ receivedByCategory('Победы') }} из {{ countByCategory('Победы') }}</strong>
                 </div>
 
                 <div class="side_row">
                     <span>Поражения</span>
-                    <strong>{{ countByCategory('Поражения') }}</strong>
+                    <strong>{{ receivedByCategory('Поражения') }} из {{ countByCategory('Поражения') }}</strong>
                 </div>
             </div>
         </aside>
