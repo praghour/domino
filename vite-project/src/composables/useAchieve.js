@@ -168,6 +168,19 @@ function countByCategory(category) {
     return count;
 };
 
+// полученные достижения в категории
+function receivedByCategory(category) {
+    let count = 0;
+
+    for (let i = 0; i < achievements.value.length; i++) {
+        if (achievements.value[i].category === category && achievements.value[i].isReceived === true) {
+            count++;
+        };
+    };
+
+    return count;
+};
+
 // экспорт всего и вся
 updateStatsFromStorage();
 
@@ -177,6 +190,7 @@ export default function useAchieve() {
         achievements,
         receivedAchievements,
         countByCategory,
+        receivedByCategory,
         addStat,
         saveStatsToStorage,
         updateStatsFromStorage
