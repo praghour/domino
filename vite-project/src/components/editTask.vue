@@ -31,6 +31,18 @@ const errors = reactive({
     priority: ''
 });
 
+// получение имён подзадач 
+function getSubtaskName(subtask) {
+    if (!subtask) {
+        return '';
+    };
+    if (typeof subtask === 'string') {
+        return subtask;
+    };
+
+    return subtask.name;
+};
+
 // заполнение формы
 function fillForm(task) {
     if (!task) {
@@ -44,9 +56,9 @@ function fillForm(task) {
 
     if (task.subtasks && task.subtasks.length) {
         form.subtasks = [
-            task.subtasks[0] || '',
-            task.subtasks[1] || '',
-            task.subtasks[2] || ''
+            getSubtaskName(task.subtasks[0]),
+            getSubtaskName(task.subtasks[1]),
+            getSubtaskName(task.subtasks[2])
         ];
     } else {
         form.subtasks = ['', '', ''];
