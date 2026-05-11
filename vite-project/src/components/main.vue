@@ -16,7 +16,7 @@ const router = useRouter();
 
 const { showNotice } = useNotice();
 const { tasks, deleteTask, editTask, saveTasksToStorage, getTodayDate } = useTask();
-const { findCurrency } = useMoney();
+const { findCurrency, addCurrency } = useMoney();
 
 const { addStat } = useAchieve();
   
@@ -77,13 +77,25 @@ function changeFilter(filter) {
 // отметка о выполнении задачи
 function completeTask(task) {
     task.isDone = !task.isDone;
-    saveTasksToStorage();
-
     if (task.isDone) {
-        showNotice('Задача выполнена', 'Задача отмечена как завершённая');
+        const reward = getTaskReward(task);
+        addCurrency('money', reward);
+        showNotice('Задача выполнена', 'Получено монет: ' + reward);
     } else {
         showNotice('Задача активна', 'Задача снова вернулась в список');
     };
+    saveTasksToStorage();
+};
+
+// определение награды за задачу
+function getTaskReward(task) {
+    if (task.priority === 'Высокий') {
+        return 3;
+    };
+    if (task.priority === 'Средний') {
+        return 2;
+    };
+    return 1;
 };
 
 // архивирование задачи
