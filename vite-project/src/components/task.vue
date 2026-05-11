@@ -177,7 +177,7 @@ function saveEditedTask(editedTask) {
                     <img src="/icons/clock.svg" alt="">
                     <div>
                         <b>Обновлено</b>
-                        <p>{{ task.date }}</p>
+                        <p>{{ task.updatedDate || task.date }}</p>
                     </div>
                 </div>
                 <div class="info_item">
