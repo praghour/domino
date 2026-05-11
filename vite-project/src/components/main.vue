@@ -283,12 +283,6 @@ button {
   cursor: pointer;
 }
 
-.filter_icon_button {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-}
-
 .filter_button {
   padding: 10px 14px;
 
@@ -296,19 +290,27 @@ button {
   align-items: center;
   gap: 6px;
 
+  background: #eff3f8;
+  color: #66748a;
+
   font-size: 13px;
 }
 
-.filter_button img,
-.filter_icon_button img {
+.filter_button img {
   width: 16px;
   height: 16px;
   display: block;
+
+  filter: brightness(0) saturate(100%) invert(45%) sepia(12%) saturate(506%) hue-rotate(176deg) brightness(94%) contrast(89%);
 }
 
 .filter_button.active {
   background: #dbeafd;
   color: #2d78f5;
+}
+
+.filter_button.active img {
+  filter: brightness(0) saturate(100%) invert(42%) sepia(89%) saturate(1788%) hue-rotate(204deg) brightness(98%) contrast(96%);
 }
 
 .add_button,
@@ -468,11 +470,6 @@ button {
   gap: 35px;
 
   margin-top: 12px;
-}
-
-.game_stats span {
-    font-family: 'FRM3216x16', 'FRM325x8', monospace;
-    font-size: 16px;
 }
 
 .game_stats span {
