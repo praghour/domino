@@ -12,12 +12,6 @@ const { gacha, win, lastFish } = useGacha();
 const { fishList, addFishtoParty, removeFishFromParty, party, addOrUpdateFish } = useFishman();
 const aquarium = useAquarium();
 
-// балванка для тестов 
-const addTestCurrency = () => {
-  addCurrency('money', 10);
-  addCurrency('crystal', 10);
-};
-
 // БАБКИ
 const { findCurrency, spendCurrency, currency, addCurrency } = useMoney();
 const { showNotice, isNoticeVisible, notice } = useNotice();
@@ -225,7 +219,7 @@ function closeWinModal() {
                 <div class="balance-values">
                     <p class="balance-item">{{ userMoney }}<img src="/Aquarium/money.png" alt=""></p>
                     <p class="balance-item">{{ userCrystals }}<img src="/Aquarium/crystals.png" alt=""></p>
-                    <button @click="addTestCurrency">+10</button>
+
                 </div>
             </div>
             <button class="chest-btn" @click="showGachaModal = true">Сундуки</button>
@@ -365,7 +359,7 @@ function closeWinModal() {
             <button class="close" @click="showWinModal = false"><img src="/gacha/close.jpg" alt=""></button>
         </div>
         <div class="win-content">
-            <img :src="lastFish.img" :alt="lastFish.alt" class="win-fish-img">
+            <img :src="lastFish.src" :alt="lastFish.src" class="win-fish-img">
             <h3 class="win-fish-name">{{ lastFish.name }}</h3>
             <h3 class="win-fish-name">{{ lastFish.rarity }}</h3>
             <button class="close-win-btn" @click="closeWinModal">Отлично!</button>
@@ -897,9 +891,11 @@ body {
 }
 
 .fon-price-text {
+  color: white;
   font-size: 18px;
   font-weight: bold;
 }
+
 
 .fon-price-icon {
   width: 24px;
