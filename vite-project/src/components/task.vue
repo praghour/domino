@@ -143,7 +143,7 @@ function saveEditedTask(editedTask) {
                 <span class="done_label" v-if="task.isDone">✓ Выполнено</span>
                 <span class="date_label">
                     <img src="/icons/calendar.svg" alt="">
-                    {{ task.date }}
+                    {{ task.deadline || task.date }}
                 </span>
             </div>
 
@@ -177,7 +177,7 @@ function saveEditedTask(editedTask) {
                     <img src="/icons/calendar.svg" alt="">
                     <div>
                         <b>Создано</b>
-                        <p>{{ task.date }}</p>
+                        <p>{{ task.createdDate || task.date }}</p>
                     </div>
                 </div>
                 <div class="info_item">

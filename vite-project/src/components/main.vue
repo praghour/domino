@@ -15,7 +15,7 @@ const selectedTask = ref(null);
 const router = useRouter();
 
 const { showNotice } = useNotice();
-const { tasks, deleteTask, editTask, saveTasksToStorage } = useTask();
+const { tasks, deleteTask, editTask, saveTasksToStorage, getTodayDate } = useTask();
 const { findCurrency } = useMoney();
 
 const { addStat } = useAchieve();
@@ -59,13 +59,13 @@ const activeTasks = computed(() => {
 // задачи на сегодня
 const todayTasks = computed(() => {
     const result = [];
+    const today = getTodayDate();
 
     for (let i = 0; i < tasks.value.length; i++) {
-        if (tasks.value[i].isArchive !== true && result.length < 3) {
+        if (tasks.value[i].isArchive !== true && tasks.value[i].deadline === today && result.length < 3) {
             result.push(tasks.value[i]);
         };
     };
-
     return result;
 });
 

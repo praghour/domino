@@ -2,62 +2,62 @@ import { computed, reactive } from 'vue';
 
 // default список задач для проверок и тестов
 const defaultTaskList = [
-    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', date: '2026-05-05', subtasks: [
+    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-11', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', date: '2026-05-05', subtasks: [
+    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', date: '2026-05-05', subtasks: [
+    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', date: '2026-05-05', subtasks: [
+    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', date: '2026-05-05', subtasks: [
+    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', date: '2026-05-05', subtasks: [
+    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 6, name: 'Задача 7', description: 'Сделать раз', priority: 'Низкий', date: '2026-05-05', subtasks: [
+    {id: 6, name: 'Задача 7', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 7, name: 'Задача 8', description: 'Сделать два', priority: 'Средний', date: '2026-05-05', subtasks: [
+    {id: 7, name: 'Задача 8', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 8, name: 'Задача 9', description: 'Сделать три', priority: 'Высокий', date: '2026-05-05', subtasks: [
+    {id: 8, name: 'Задача 9', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 9, name: 'Задача 10', description: 'Сделать раз', priority: 'Низкий', date: '2026-05-05', subtasks: [
+    {id: 9, name: 'Задача 10', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 10, name: 'Задача 11', description: 'Сделать два', priority: 'Средний', date: '2026-05-05', subtasks: [
+    {id: 10, name: 'Задача 11', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 11, name: 'Задача 12', description: 'Сделать три', priority: 'Высокий', date: '2026-05-05', subtasks: [
+    {id: 11, name: 'Задача 12', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
@@ -107,7 +107,9 @@ function loadTasksFromStorage() {
                 name: task.name,
                 description: task.description,
                 subtasks: task.subtasks,
-                date: task.date,
+                createdDate: task.createdDate,
+                updatedDate: task.updatedDate,
+                deadline: task.deadline,
                 priority: task.priority,
                 isDone: false,
                 isArchive: false,
@@ -149,8 +151,9 @@ function addTask(newTask) {
         name: newTask.name.trim(),
         description: newTask.description.trim(),
         subtasks: subtasksList,
-        date: newTask.date,
-        updatedDate: newTask.date,
+        createdDate: getTodayDate(),
+        updatedDate: getTodayDate(),
+        deadline: newTask.date,
         priority: newTask.priority,
         isDone: false,
         isArchive: false,
@@ -187,7 +190,7 @@ function editTask(taskId, editTaskData) {
     editingTask.name = taskData.name;
     editingTask.description = taskData.description;
     editingTask.subtasks = taskData.subtasks;
-    editingTask.date = taskData.date;
+    editingTask.deadline = taskData.date;
     editingTask.updatedDate = getTodayDate();
     editingTask.priority = taskData.priority;
 
