@@ -39,7 +39,6 @@ const setActiveMode = (mode) => {
   activeMode.value = mode;
 };
 
-// === АКВАРИУМ: горизонтальный слайдер (фоны) ===
 const visibleFonSlides = computed(() => {
   return aquarium.slidesfon.value.slice(aquarium.currentIndexFon.value, aquarium.currentIndexFon.value + 3);
 });
@@ -48,7 +47,6 @@ const currentFon = computed(() => {
   return aquarium.slidesfon.value.find(f => f.id === aquarium.selectedFonId.value);
 });
 
-// === НОВОЕ: для слайдера рыб с блокировкой используем allFishWithStatus ===
 const currentIndexFish = ref(0);
 
 // МЕНЯЕМ: теперь показываем ВСЕХ рыб с флагом блокировки
@@ -82,8 +80,6 @@ function selectAquariumFish(fish) {
 function isFishInAquarium(fishId) {
   return aquarium.selectedFishIds.value.some(fish => fish.id === fishId);
 }
-
-// НОВОЕ: функция для стилизации карточки рыбы
 function getFishCardClass(fish) {
   return {
     'bgfish-btn': true,
@@ -192,7 +188,6 @@ const onGachaClick = () => {
   
   if (lastFish.value) {
     addOrUpdateFish(lastFish.value);
-    // НОВОЕ: разблокируем полученную рыбу
     if (aquarium.unlockFish) {
       aquarium.unlockFish(lastFish.value.id);
     }

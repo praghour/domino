@@ -20,7 +20,7 @@ const slidesfon = ref([
 const currentIndexFon = ref(0);
 const selectedFonId = ref(1);
 
-// Купленные фоны (первый открыт по умолчанию)
+// Купленные фоны
 const savedUnlockedFonIds = localStorage.getItem("unlockedFonIds");
 const unlockedFonIds = ref(savedUnlockedFonIds ? JSON.parse(savedUnlockedFonIds) : [1]);
 
@@ -62,7 +62,7 @@ function selectFon(slide) {
   localStorage.setItem("aquarium_selectedFonId", JSON.stringify(selectedFonId.value));
 }
 
-// slidesfon с флагом isUnlocked для отображения в слайдере
+
 const slidesfonWithStatus = computed(() => {
   return slidesfon.value.map(fon => ({
     ...fon,
@@ -83,7 +83,6 @@ export const allFish = ref([
   { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 30, health: 40, name: 'Немезида', rarity: 'Легендарная', abilitytype: 'damage', abilityvalue: 30, ability: "Падение луны: +30 dmg", lvl: 1 }
 ]);
 
-// НОВОЕ: массив разблокированных ID рыб - ИЗНАЧАЛЬНО ПУСТОЙ
 const unlockedFishIds = ref(JSON.parse(localStorage.getItem("unlockedFishIds")) || [1]);
 // Загрузка разблокированных рыб из localStorage
 const savedUnlockedFishIds = localStorage.getItem("unlockedFishIds");
@@ -91,7 +90,6 @@ if (savedUnlockedFishIds) {
   unlockedFishIds.value = JSON.parse(savedUnlockedFishIds);
 }
 
-// НОВОЕ: функция разблокировки рыбы
 function unlockFish(fishId) {
   if (!unlockedFishIds.value.includes(fishId)) {
     unlockedFishIds.value.push(fishId);
@@ -105,7 +103,6 @@ function unlockFish(fishId) {
   return false;
 }
 
-// НОВОЕ: массовая разблокировка
 function updateUnlockedFish(fishIds) {
   let hasNew = false;
   fishIds.forEach(fishId => {
@@ -119,12 +116,9 @@ function updateUnlockedFish(fishIds) {
   }
 }
 
-// НОВОЕ: проверка, разблокирована ли рыба
 function isFishUnlocked(fishId) {
   return unlockedFishIds.value.includes(fishId);
 }
-
-// НОВОЕ: ВСЕ рыбы с флагом блокировки
 const allFishWithStatus = computed(() => {
   return allFish.value.map(fish => ({
     ...fish,
@@ -173,11 +167,9 @@ if (savedSelectedFishIds) {
   }));
 }
 
-// Синхронизация availableFishIds с коллекцией игрока - НО НЕ РАЗБЛОКИРУЕМ РЫБ!
 function syncAvailableFishWithCollection() {
   const fishIds = Object.keys(playerFishCollection.value).map(id => Number(id));
   availableFishIds.value = fishIds;
-  // УБРАНО автоматическая разблокировка!!!
 }
 
 watch(playerFishCollection, () => {
@@ -208,7 +200,6 @@ function prevSlideFon() {
   if (currentIndexFon.value > 0) currentIndexFon.value--;
 }
 
-// Функции слайдера рыб - используем allFishWithStatus
 function nextSlideFish() {
   if (currentIndexFish.value + 3 < allFishWithStatus.value.length) currentIndexFish.value++;
 }
