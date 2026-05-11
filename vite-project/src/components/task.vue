@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import useTask from '../composables/useTask';
 import useNotice from '../composables/useNotice';
+import useMoney from '../composables/useMoney';
 import EditTask from './editTask.vue';
 
 const route = useRoute();
@@ -10,6 +11,7 @@ const router = useRouter();
 
 const { findTask, deleteTask, editTask, saveTasksToStorage } = useTask();
 const { showNotice } = useNotice();
+const { addCurrency } = useMoney();
 
 const isEditModalOpen = ref(false);
 
@@ -43,11 +45,29 @@ const subtasks = computed(() => {
     return task.value.subtasks;
 });
 
+// определение награды за задачу
+const taskReward = computed(() => {
+    if (!task.value) {
+        return 0;
+    };
+    if (task.value.priority === 'Высокий') {
+        return 3;
+    };
+    if (task.value.priority === 'Средний') {
+        return 2;
+    };
+    return 1;
+});
+
 // прогресс
 const progressPercent = computed(() => {
+    if (task.value && task.value.isDone === true) {
+        return 100;
+    };
     if (subtasks.value.length === 0) {
         return 0;
     };
+
     return Math.round(doneSubtasks.value / subtasks.value.length * 100);
 });
 
@@ -62,12 +82,19 @@ function goBack() {
 };
 
 function completeTask() {
-    task.value.isDone = true;
+    task.value.isDone = !task.value.isDone;
+    if (task.value.isDone) {
+        addCurrency('money', taskReward.value);
+        showNotice('Задача выполнена', 'Получено монет: ' + taskReward.value);
+    } else {
+        showNotice('Выполнение отменено', 'Задача снова активна');
+    };
     saveTasksToStorage();
-    showNotice('Задача выполнена', 'Задача отмечена как завершённая');
 };
-
 function completeSubtask(subtask) {
+    if (typeof subtask === 'string') {
+        return;
+    };
     subtask.isDone = !subtask.isDone;
     saveTasksToStorage();
 };
@@ -121,11 +148,14 @@ function saveEditedTask(editedTask) {
                     <button class="checkbox" :class="{ checked: subtask.isDone }" @click="completeSubtask(subtask)">
                         <span v-if="subtask.isDone">✓</span>
                     </button>
-                    <p :class="{ done: subtask.isDone }">{{ subtask.name || subtask }}</p>
+                    <p :class="{ done: subtask.isDone }">{{ subtask.name }}</p>
                 </div>
             </div>
 
-            <button class="done_button" @click="completeTask">Сделано</button>
+            <button class="done_button" :class="{ cancel_done_button: task.isDone }" @click="completeTask">
+                <span v-if="task.isDone">Отменить</span>
+                <span v-else>Сделано</span>
+            </button>
 
             <div class="subtasks_info">
                 <p>Всего подзадач: {{ subtasks.length }}</p>
@@ -154,7 +184,7 @@ function saveEditedTask(editedTask) {
                     <span class="money_icon">$</span>
                     <div>
                         <b>Награда</b>
-                        <p>1 <img src="/icons/coin.svg" alt=""></p>
+                        <p>{{ taskReward }} <img src="/icons/coin.svg" alt=""></p>
                     </div>
                 </div>
             </div>
@@ -354,6 +384,11 @@ function saveEditedTask(editedTask) {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+}
+
+.cancel_done_button {
+    background: #eff3f8;
+    color: #66748a;
 }
 
 .subtasks_info {

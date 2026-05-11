@@ -155,9 +155,24 @@ function editTask(taskId, editTaskData) {
 
 // очистка подзадач
 function getCleanSubtasks(subtasks) {
-    const result = subtasks.filter((subtask) => {
-        return subtask.trim() !== '';
-    });
+    const result = [];
+    for (let i = 0; i < subtasks.length; i++) {
+        if (typeof subtasks[i] === 'string') {
+            if (subtasks[i].trim() !== '') {
+                result.push({
+                    name: subtasks[i].trim(),
+                    isDone: false
+                });
+            };
+        } else {
+            if (subtasks[i].name.trim() !== '') {
+                result.push({
+                    name: subtasks[i].name.trim(),
+                    isDone: subtasks[i].isDone
+                });
+            };
+        };
+    };
 
     return result;
 };
