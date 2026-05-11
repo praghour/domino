@@ -91,6 +91,7 @@ function completeTask() {
     };
     saveTasksToStorage();
 };
+
 function completeSubtask(subtask) {
     if (typeof subtask === 'string') {
         return;
@@ -99,10 +100,16 @@ function completeSubtask(subtask) {
     saveTasksToStorage();
 };
 
+// архивирование/разархивирование
 function archiveTask() {
-    task.value.isArchive = true;
+    task.value.isArchive = !task.value.isArchive;
     saveTasksToStorage();
-    showNotice('Задача добавлена в архив', 'Её можно найти в архиве');
+
+    if (task.value.isArchive) {
+        showNotice('Задача добавлена в архив', 'Её можно найти в списке "архиве"');
+    } else {
+        showNotice('Задача снова активна', 'Задача снова в списке "активно"');
+    };
 };
 
 function removeTask() {
@@ -206,7 +213,8 @@ function saveEditedTask(editedTask) {
                 <h3>Быстрые действия</h3>
                 <button class="action_button" @click="archiveTask">
                     <img src="/icons/archive.svg" alt="">
-                    Архивировать
+                    <span v-if="task.isArchive">Разархивировать</span>
+                    <span v-else>Архивировать</span>
                 </button>
                 <button class="action_button" @click="openEditModal">
                     <img src="/icons/edit.svg" alt="">
