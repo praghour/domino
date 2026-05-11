@@ -157,7 +157,7 @@ function saveEditedTask(editedTask) {
                     </button>
                     <p :class="{ done: subtask.isDone }">{{ subtask.name }}</p>
                 </div>
-                <div v-else class="info_item"><p>Позадач пока нет, вы можете добавить их при редактировании задачи</p></div>
+                <div v-else class="empty_subtasks"><p>Подзадач пока нет, вы можете добавить их при редактировании задачи.</p></div>
             </div>
 
             <button class="done_button" :class="{ cancel_done_button: task.isDone }" @click="completeTask">
@@ -530,5 +530,29 @@ function saveEditedTask(editedTask) {
 
 .delete_action {
     color: #e65359;
+}
+
+.delete_action img {
+    filter: brightness(0) saturate(100%) invert(44%) sepia(63%) saturate(1185%) hue-rotate(321deg) brightness(94%) contrast(91%);
+}
+
+.empty_subtasks {
+    height: 250px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.empty_subtasks p {
+    max-width: 520px;
+    margin: 0;
+
+    color: #66748a;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 500;
 }
 </style>
