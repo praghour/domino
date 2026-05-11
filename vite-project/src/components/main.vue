@@ -167,7 +167,7 @@ function openAchievements() {
                     <span v-if="task.isDone">✓</span>
                 </button>
 
-                <p class="task_name" :class="{ done: task.isDone }">
+                <p class="task_name" :class="{ done: task.isDone }" @click="router.push({name: 'task', params: {id: task.id}})">
                     {{ task.name }}
                 </p>
 

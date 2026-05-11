@@ -106,7 +106,7 @@ function saveEditedTask(editedTask) {
                 <span class="task_priority" :class="{ high: task.priority === 'Высокий', medium: task.priority === 'Средний', low: task.priority === 'Низкий' }">{{ task.priority }}</span>
                 <span class="done_label" v-if="task.isDone">✓ Выполнено</span>
                 <span class="date_label">
-                    <img src="/icons/date.svg" alt="">
+                    <img src="/icons/calendar.svg" alt="">
                     {{ task.date }}
                 </span>
             </div>
@@ -135,14 +135,14 @@ function saveEditedTask(editedTask) {
             <div class="side_block">
                 <h3>Информация</h3>
                 <div class="info_item">
-                    <img src="/icons/date.svg" alt="">
+                    <img src="/icons/calendar.svg" alt="">
                     <div>
                         <b>Создано</b>
                         <p>{{ task.date }}</p>
                     </div>
                 </div>
                 <div class="info_item">
-                    <img src="/icons/time.svg" alt="">
+                    <img src="/icons/clock.svg" alt="">
                     <div>
                         <b>Обновлено</b>
                         <p>{{ task.date }}</p>
