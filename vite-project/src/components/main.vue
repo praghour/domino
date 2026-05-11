@@ -239,13 +239,14 @@ function openAchievements() {
 
 <style scoped>
 .main_page {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) 310px;
-  gap: 30px;
-  padding: 20px;
-  background: #f8fafc;
-  max-width: 1200px;
+  width: min(100% - 80px, 1362px);
   margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 30px;
+
+  background: #f8fafc;
 }
 
 .tasks_section,
@@ -258,6 +259,8 @@ function openAchievements() {
 }
 
 .tasks_section {
+  min-height: 520px;
+
   display: flex;
   flex-direction: column;
 }
@@ -288,9 +291,11 @@ button {
 
 .filter_button {
   padding: 10px 14px;
+
   display: flex;
   align-items: center;
   gap: 6px;
+
   font-size: 13px;
 }
 
@@ -322,8 +327,10 @@ button {
   display: flex;
   align-items: center;
   gap: 14px;
+
   padding: 8px 14px;
   margin-bottom: 8px;
+
   border: 1px solid #e5eaf1;
   border-radius: 10px;
 }
@@ -332,10 +339,13 @@ button {
   width: 22px;
   height: 22px;
   padding: 0;
+
   border: 2px solid #374151;
   border-radius: 4px;
+
   background: white;
   color: #2f75ff;
+
   font-size: 18px;
   flex-shrink: 0;
 }
@@ -347,6 +357,7 @@ button {
 .task_name {
   flex: 1;
   margin: 0;
+
   color: #0d1627;
   font-size: 14px;
   text-align: left;
@@ -358,8 +369,10 @@ button {
 
 .task_priority {
   min-width: 70px;
+
   padding: 6px 10px;
   border-radius: 10px;
+
   text-align: center;
   font-size: 14px;
   font-weight: 600;
@@ -389,6 +402,7 @@ button {
   width: 28px;
   height: 28px;
   padding: 0;
+
   background: transparent;
   flex-shrink: 0;
 }
@@ -400,11 +414,19 @@ button {
 }
 
 .tasks_info {
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 20px;
+
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
   color: #66748a;
   font-size: 14px;
+}
+
+.tasks_info p {
+  margin: 0;
 }
 
 .sidebar {
@@ -415,15 +437,22 @@ button {
 
 .side_block h3 {
   margin: 0 0 14px;
+
   color: #0d1627;
   font-size: 16px;
 }
 
 .aquarium {
   height: 160px;
+
   border-radius: 16px;
+
   background: #dbeafd;
   background-image: url('/icons/aqua.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -437,6 +466,7 @@ button {
   display: flex;
   justify-content: center;
   gap: 35px;
+
   margin-top: 12px;
 }
 
@@ -449,6 +479,9 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
+
+  font-family: 'FRM3216x16', 'FRM325x8', monospace;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -460,11 +493,13 @@ button {
 .today_task {
   display: flex;
   gap: 10px;
+
   margin-bottom: 16px;
 }
 
 .today_task p {
   margin: 0;
+
   color: #0d1627;
   font-size: 14px;
   font-weight: 600;
@@ -474,13 +509,16 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
+
   margin-top: 4px;
+
   color: #66748a;
 }
 
 .priority_dot {
   width: 8px;
   height: 8px;
+
   border-radius: 50%;
 }
 
@@ -498,6 +536,7 @@ button {
 
 .show_all_button {
   width: 100%;
+
   background: transparent;
   color: #2d78f5;
 }
@@ -506,16 +545,21 @@ button {
   display: flex;
   flex-direction: row;
   gap: 12px;
+
   width: 100%;
 }
 
 .quick_button {
   width: 50%;
   height: 74px;
+
   padding: 10px;
+
   border: 1px solid #e5eaf1;
   border-radius: 12px;
+
   background: #eff3f8;
+
   display: flex;
   flex-direction: column;
   align-items: center;
