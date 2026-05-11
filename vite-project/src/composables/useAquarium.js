@@ -72,15 +72,15 @@ const slidesfonWithStatus = computed(() => {
 
 // ВСЕ РЫБЫ
 export const allFish = ref([
-  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 10, health: 20, name: 'Рыба1', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "claw", lvl: 1 },
-  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 10, health: 20, name: 'Рыба2', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "chew", lvl: 1 },
-  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", damage: 10, health: 20, name: 'Рыба3', rarity: 'common', abilitytype: 'heal', abilityvalue: 5, ability: "feed", lvl: 1 },
-  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", damage: 10, health: 20, name: 'Рыба4', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "jaw", lvl: 1 },
-  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", damage: 10, health: 20, name: 'Рыба5', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "punch", lvl: 1 },
-  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", damage: 10, health: 20, name: 'Рыба6', rarity: 'rare', abilitytype: 'heal', abilityvalue: 10, ability: "brbrpatapims", lvl: 1 },
-  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", damage: 10, health: 20, name: 'Рыба7', rarity: 'legendary', abilitytype: 'heal', abilityvalue: 20, ability: "kiss", lvl: 1 },
-  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", damage: 10, health: 20, name: 'Рыба8', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "lowkick", lvl: 1 },
-  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Рыба9', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
+  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 10, health: 20, name: 'Плавник', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "claw", lvl: 1 },
+  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 10, health: 20, name: 'Пузырёк', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "chew", lvl: 1 },
+  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", damage: 10, health: 20, name: 'Чешуйка', rarity: 'common', abilitytype: 'heal', abilityvalue: 5, ability: "feed", lvl: 1 },
+  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", damage: 10, health: 20, name: 'Карась', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "jaw", lvl: 1 },
+  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", damage: 10, health: 20, name: 'Асхен', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "punch", lvl: 1 },
+  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", damage: 10, health: 20, name: 'Абсолют', rarity: 'rare', abilitytype: 'heal', abilityvalue: 10, ability: "brbrpatapims", lvl: 1 },
+  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", damage: 10, health: 20, name: 'Центурион', rarity: 'legendary', abilitytype: 'heal', abilityvalue: 20, ability: "kiss", lvl: 1 },
+  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", damage: 10, health: 20, name: 'Ноктюрн', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "lowkick", lvl: 1 },
+  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Немезида', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
 ]);
 
 // НОВОЕ: массив разблокированных ID рыб - ИЗНАЧАЛЬНО ПУСТОЙ

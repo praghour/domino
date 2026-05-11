@@ -1,8 +1,29 @@
 <script setup>
+import { watch, onMounted, onUnmounted } from 'vue';
 import AchievementCard from './AchievementCard.vue';
 import useAchieve from '../composables/useAchieve';
 
-const { achievements, receivedAchievements, countByCategory } = useAchieve();
+const { achievements, receivedAchievements, countByCategory, updateStatsFromStorage } = useAchieve();
+
+let interval = null;
+
+// Обновляем достижения каждую секунду
+onMounted(() => {
+    interval = setInterval(() => {
+        updateStatsFromStorage();
+    }, 1000);
+});
+
+onUnmounted(() => {
+    if (interval) {
+        clearInterval(interval);
+    }
+});
+
+// Следим за изменениями достижений и диспатчим событие
+watch(achievements, () => {
+    window.dispatchEvent(new CustomEvent('achievements-updated'));
+}, { deep: true });
 </script>
 
 <template>
@@ -14,7 +35,7 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
             </div>
 
             <div class="achievements_grid">
-                <AchievementCard v-for="achievement in achievements" :achievement="achievement" />
+                <AchievementCard v-for="achievement in achievements" :achievement="achievement" :key="achievement.title" />
             </div>
         </section>
 
@@ -61,6 +82,7 @@ const { achievements, receivedAchievements, countByCategory } = useAchieve();
 </template>
 
 <style scoped>
+/* Стили остаются без изменений */
 .achievements_page {
     width: min(100% - 80px, 1362px);
     min-height: 100vh;

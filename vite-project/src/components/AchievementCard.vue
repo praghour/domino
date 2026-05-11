@@ -1,9 +1,98 @@
 <script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import useMoney from '../composables/useMoney.js';
+
 const props = defineProps({
     achievement: {
         type: Object,
         required: true
     }
+});
+
+const { addCurrency } = useMoney();
+const isClaimed = ref(false);
+const isReceived = ref(props.achievement.isReceived);
+
+// Загрузка состояния полученных наград
+const loadClaimedState = () => {
+    const claimedRewards = localStorage.getItem('claimedAchievements');
+    if (claimedRewards) {
+        const claimed = JSON.parse(claimedRewards);
+        isClaimed.value = claimed.includes(props.achievement.title);
+    }
+};
+
+// Сохранение состояния полученной награды
+const saveClaimedState = () => {
+    const claimedRewards = localStorage.getItem('claimedAchievements');
+    let claimed = claimedRewards ? JSON.parse(claimedRewards) : [];
+    
+    if (!claimed.includes(props.achievement.title)) {
+        claimed.push(props.achievement.title);
+        localStorage.setItem('claimedAchievements', JSON.stringify(claimed));
+    }
+};
+
+// Награда за достижение
+const getRewardAmount = (achievement) => {
+    if (achievement.reward) {
+        return achievement.reward;
+    }
+    
+    let baseReward = 10;
+    
+    if (achievement.target >= 100) {
+        baseReward = 50;
+    } else if (achievement.target >= 50) {
+        baseReward = 25;
+    } else if (achievement.target >= 10) {
+        baseReward = 15;
+    }
+    
+    return baseReward;
+};
+
+const claimReward = () => {
+    if (isClaimed.value) return;
+    
+    const rewardAmount = getRewardAmount(props.achievement);
+    addCurrency('money', rewardAmount);
+    
+    isClaimed.value = true;
+    saveClaimedState();
+};
+
+// Следим за изменением 
+watch(() => props.achievement.isReceived, (newValue) => {
+    isReceived.value = newValue;
+});
+
+// отслеживаниe изменений в localStorage
+const storageListener = (event) => {
+    if (event.key === 'claimedAchievements') {
+        loadClaimedState();
+    }
+};
+
+// событие обновления статистики
+const handleStatsUpdate = () => {
+    isReceived.value = props.achievement.isReceived;
+};
+
+onMounted(() => {
+    loadClaimedState();
+    isReceived.value = props.achievement.isReceived;
+    
+    //изменения в localStorage
+    window.addEventListener('storage', storageListener);
+    
+
+    window.addEventListener('achievements-updated', handleStatsUpdate);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('storage', storageListener);
+    window.removeEventListener('achievements-updated', handleStatsUpdate);
 });
 </script>
 
@@ -20,9 +109,14 @@ const props = defineProps({
             </div>
         </div>
 
-        <div v-if="props.achievement.isReceived === true" class="received">
+        <div v-if="isReceived === true && isClaimed === true" class="received">
             Получено
         </div>
+
+        <button v-else-if="isReceived === true && isClaimed === false" class="claim-btn" @click="claimReward"> 
+            <span>{{ getRewardAmount(props.achievement) }}</span>
+            <img src="/Aquarium/money.png" alt="">
+        </button>
 
         <div v-else class="progress_box">
             <div class="progress_line">
@@ -130,6 +224,39 @@ const props = defineProps({
     color: #4cae6c;
     font-size: 15px;
     font-weight: 600;
+}
+
+.claim-btn {
+    height: 32px;
+
+    background: #2D78F5;
+    border: none;
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.claim-btn:hover {
+    background: #1a5bc4;
+}
+
+.claim-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.claim-btn span {
+    color: white;
 }
 
 .progress_box {
