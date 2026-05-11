@@ -151,12 +151,13 @@ function saveEditedTask(editedTask) {
 
             <div class="subtasks_block">
                 <h3>Подзадачи</h3>
-                <div v-for="subtask in subtasks" class="subtask_item">
+                <div v-for="subtask in subtasks" v-if="subtasks.length !== 0" class="subtask_item">
                     <button class="checkbox" :class="{ checked: subtask.isDone }" @click="completeSubtask(subtask)">
                         <span v-if="subtask.isDone">✓</span>
                     </button>
                     <p :class="{ done: subtask.isDone }">{{ subtask.name }}</p>
                 </div>
+                <div v-else class="info_item"><p>Позадач пока нет, вы можете добавить их при редактировании задачи</p></div>
             </div>
 
             <button class="done_button" :class="{ cancel_done_button: task.isDone }" @click="completeTask">

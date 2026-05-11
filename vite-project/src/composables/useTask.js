@@ -2,32 +2,32 @@ import { computed, reactive } from 'vue';
 
 // default список задач для проверок и тестов
 const defaultTaskList = [
-    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-11', subtasks: [
+    {id: 0, name: 'Задача 1', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-12', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
+    {id: 1, name: 'Задача 2', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-12', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
+    {id: 2, name: 'Задача 3', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-12', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
+    {id: 3, name: 'Задача 4', description: 'Сделать раз', priority: 'Низкий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-11', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
+    {id: 4, name: 'Задача 5', description: 'Сделать два', priority: 'Средний', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-11', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
     ]},
-    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-05', subtasks: [
+    {id: 5, name: 'Задача 6', description: 'Сделать три', priority: 'Высокий', createdDate: '2026-05-05', updatedDate: '2026-05-05', deadline: '2026-05-11', subtasks: [
         {name: 'Подзадача 1', isDone: false},
         {name: 'Подзадача 2', isDone: false},
         {name: 'Подзадача 3', isDone: false}
