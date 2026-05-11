@@ -72,20 +72,19 @@ const slidesfonWithStatus = computed(() => {
 
 // ВСЕ РЫБЫ
 export const allFish = ref([
-  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 10, health: 20, name: 'Плавник', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "claw", lvl: 1 },
-  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 10, health: 20, name: 'Пузырёк', rarity: 'common', abilitytype: 'damage', abilityvalue: 5, ability: "chew", lvl: 1 },
-  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", damage: 10, health: 20, name: 'Чешуйка', rarity: 'common', abilitytype: 'heal', abilityvalue: 5, ability: "feed", lvl: 1 },
-  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", damage: 10, health: 20, name: 'Карась', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "jaw", lvl: 1 },
-  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", damage: 10, health: 20, name: 'Асхен', rarity: 'rare', abilitytype: 'damage', abilityvalue: 10, ability: "punch", lvl: 1 },
-  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", damage: 10, health: 20, name: 'Абсолют', rarity: 'rare', abilitytype: 'heal', abilityvalue: 10, ability: "brbrpatapims", lvl: 1 },
-  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", damage: 10, health: 20, name: 'Центурион', rarity: 'legendary', abilitytype: 'heal', abilityvalue: 20, ability: "kiss", lvl: 1 },
-  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", damage: 10, health: 20, name: 'Ноктюрн', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "lowkick", lvl: 1 },
-  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 10, health: 20, name: 'Немезида', rarity: 'legendary', abilitytype: 'damage', abilityvalue: 20, ability: "swalala", lvl: 1 }
+  { id: 1, src: "/Aquarium/fish1.png", alt: "рыба 1", damage: 5, health: 10, name: 'Плавник', rarity: 'Обычная', abilitytype: 'damage', abilityvalue: 5, ability: "Удар плавником: +5 dmg", lvl: 1 },
+  { id: 2, src: "/Aquarium/fish2.png", alt: "рыба 2", damage: 5, health: 10, name: 'Пузырёк', rarity: 'Обычная', abilitytype: 'damage', abilityvalue: 5, ability: "Укус: +5 dmg", lvl: 1 },
+  { id: 3, src: "/Aquarium/fish3.png", alt: "рыба 3", damage: 5, health: 10, name: 'Чешуйка', rarity: 'Обычная', abilitytype: 'heal', abilityvalue: 3, ability: "Пластырь: heal +3", lvl: 1 },
+  { id: 4, src: "/Aquarium/fish4.png", alt: "рыба 4", damage: 10, health: 20, name: 'Карась', rarity: 'Редкая', abilitytype: 'damage', abilityvalue: 10, ability: "Круговорот: +10 dmg", lvl: 1 },
+  { id: 5, src: "/Aquarium/fish5.png", alt: "рыба 5", damage: 10, health: 20, name: 'Асхен', rarity: 'Редкая', abilitytype: 'damage', abilityvalue: 10, ability: "Атака грифона: +10 dmg", lvl: 1 },
+  { id: 6, src: "/Aquarium/fish6.png", alt: "рыба 6", damage: 10, health: 20, name: 'Абсолют', rarity: 'Редкая', abilitytype: 'heal', abilityvalue: 7, ability: "Целебное течение:  heal +7", lvl: 1 },
+  { id: 7, src: "/Aquarium/fish7.png", alt: "рыба 7", damage: 30, health: 40, name: 'Центурион', rarity: 'Легендарная', abilitytype: 'heal', abilityvalue: 20, ability: "Поцелуй солнца: heal +20", lvl: 1 },
+  { id: 8, src: "/Aquarium/fish8.png", alt: "рыба 8", damage: 30, health: 40, name: 'Ноктюрн', rarity: 'Легендарная', abilitytype: 'damage', abilityvalue: 30, ability: "Кошмарные воды: +30 dmg", lvl: 1 },
+  { id: 9, src: "/Aquarium/fish9.png", alt: "рыба 9", damage: 30, health: 40, name: 'Немезида', rarity: 'Легендарная', abilitytype: 'damage', abilityvalue: 30, ability: "Падение луны: +30 dmg", lvl: 1 }
 ]);
 
 // НОВОЕ: массив разблокированных ID рыб - ИЗНАЧАЛЬНО ПУСТОЙ
-const unlockedFishIds = ref([]);
-
+const unlockedFishIds = ref(JSON.parse(localStorage.getItem("unlockedFishIds")) || [1]);
 // Загрузка разблокированных рыб из localStorage
 const savedUnlockedFishIds = localStorage.getItem("unlockedFishIds");
 if (savedUnlockedFishIds) {
@@ -133,7 +132,7 @@ const allFishWithStatus = computed(() => {
   }));
 });
 
-// ДОСТУПНЫЕ РЫБЫ (только для совместимости со старым кодом)
+
 const availableFishIds = ref([]);
 const availableFish = computed(() => {
   const fishList = allFish.value.filter(fish => availableFishIds.value.includes(fish.id));
