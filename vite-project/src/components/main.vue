@@ -6,6 +6,7 @@ import useTask from '../composables/useTask';
  import useMoney from '../composables/useMoney.js';
 import CreateTask from './createTask.vue';
 import EditTask from './editTask.vue';
+import useAchieve from '../composables/useAchieve';
 
 const isCreateModalOpen = ref(false);
 const isEditModalOpen = ref(false);
@@ -16,6 +17,8 @@ const router = useRouter();
 const { showNotice } = useNotice();
 const { tasks, deleteTask, editTask, saveTasksToStorage } = useTask();
 const { findCurrency } = useMoney();
+
+const { addStat } = useAchieve();
   
 const activeFilter = ref('all');
 
@@ -91,6 +94,8 @@ function archiveTask(task) {
 };
 
 function remove(id) {
+    addStat('deletedTasks');
+
     deleteTask(id);
     showNotice('Задача удалена', 'Задача убрана из списка');
 };
